@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="com.monstarmike.telemetry"
+    version="1.0.0">
+    <name>TLMTelemetry Decoder</name>
+    <description>Decodes TLM to JSON</description>
+    <license>GPL v2</license>
+
+  <js-module src="www/decoder.js" name="telemetry">
+    <clobbers target="com.monstarmike.telemetry" />
+  </js-module>
+
+  <!-- android -->
+  <platform name="android">
+    <source-file src="src/android/TLMDecoder.java" target-dir="src/com/monstarmike/telemetry" />
+  </platform>
+</plugin>
