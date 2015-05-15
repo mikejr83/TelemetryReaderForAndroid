@@ -7,7 +7,7 @@
     <description>Decodes TLM to JSON</description>
     <license>GPL v2</license>
 
-  <js-module src="www/decoder.js" name="telemetry">
+  <js-module src="www/decoder.js" name="decoder">
     <clobbers target="com.monstarmike.telemetry" />
   </js-module>
 
