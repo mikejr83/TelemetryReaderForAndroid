@@ -15,5 +15,6 @@
   <platform name="android">
     <source-file src="src/android/TLMDecoder.java" target-dir="src/com/monstarmike/telemetry" />
     <source-file src="src/android/libs/tlmreader.jar" target-dir="libs" />
+    <source-file src="src/android/libs/joda-time-2.7.jar" target-dir="libs" />
   </platform>
 </plugin>
