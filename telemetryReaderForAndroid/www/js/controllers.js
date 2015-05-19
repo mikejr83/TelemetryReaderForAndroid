@@ -1,37 +1,99 @@
-angular.module('starter.controllers', [])
-
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
-  // Form data for the login modal
-  $scope.loginData = {};
-
-  // Create the login modal that we will use later
-  $ionicModal.fromTemplateUrl('templates/login.html', {
-    scope: $scope
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
-
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
+angular.module('telemetryReaderForAndroid.controllers', [])
+.service('dataService', ['$q', function ($q) {
+  this.currentData = null;
+  
+  this.loadData = function (storeAsCurrent) {
+    var deferred = $q.defer(), that = this;
+    
+    if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.decodeFile) {
+      window.com.monstarmike.telemetry.decodeFile(function (data) {
+        if (storeAsCurrent && data) {
+          that.currentData = data;
+        }
+        
+        deferred.resolve(data);
+      },
+      function (e) {
+        console.error(e);
+      });
+    } else {
+      deferred.reject('error\'d bitch. you gots to have your plugin around fool.');
+    }
+    
+    return deferred.promise;
+  }
+  
+  this.getCurrentData = function() {
+    var deferred = $q.defer(), that = this;
+    
+    if (this.currentData != null) {
+      deferred.resolve(this.currentData);
+    } else {
+      this.loadData().then(function (data) {
+        that.currentData = data;
+        deferred.resolve(that.currentData);
+      });
+    }
+    
+    return deferred.promise;
+  }
+}])
+.controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', 'dataService', function($scope, $ionicModal, $timeout, dataService) {
+  $scope.telemetryData = null;
+  
+  $scope.doGetDataFile = function () {
+    dataService.loadData(true).then(function(data) {
+      $scope.telemetryData = data;
+    });
   };
-
-  // Open the login modal
-  $scope.login = function() {
-    $scope.modal.show();
+}])
+.controller('AltitudeController', ['$scope', '$ionicView', 'dataService', function($scope, $ionicView, dataService) {
+  $scope.altitudeChartData = null;
+  $scope.flights = [];
+  
+  $ionicView.enter = function() {
+    dataService.getCurrentData().then(function (data) { 
+      $scope.flights = data;
+    });
+  }
+  
+  $scope.selectedFlightChanged = function(flight) {
+    if (!flight) {
+      dataService.getCurrentData().then(function (data) { 
+        if (data && data[0]) {
+          $scope.selectedFlightChanged(data[0]); 
+        }
+      });
+      return;
+    }
+    
+    $scope.altitudeChartData = {
+      "xScale": "linear",
+      "yScale": "linear",
+      "type": "line",
+      "main": [{
+        "className": ".altitude",
+        "data": []
+      }]
+    };
+    
+    _.forEach(flight.blocks, function(block) {
+      if (block.blockType !== 'AltitudeBlock') return;
+      
+      $scope.altitudeChartData.main[0].data.push({
+        "x": block.timestamp,
+        "y": block.altitude
+      });
+    });
+    
+    $scope.altitudeChartData.xMin = $scope.altitudeChartData.main[0].data[0].x;
+    $scope.altitudeChartData.xMax = $scope.altitudeChartData.main[0].data[$scope.altitudeChartData.main[0].data.length - 1].x;
+    
+    console.log('altitudeChartData', $scope.altitudeChartData);
+    
+    var altitudeChart = new xChart('line', $scope.altitudeChartData, '#myChart');
   };
-
-  // Perform the login action when the user submits the login form
-  $scope.doLogin = function() {
-    console.log('Doing login', $scope.loginData);
-
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
-    $timeout(function() {
-      $scope.closeLogin();
-    }, 1000);
-  };
-})
+}])
 
 .controller('PlaylistsCtrl', function($scope) {
   $scope.playlists = [
