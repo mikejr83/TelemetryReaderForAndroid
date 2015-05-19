@@ -1,7 +1,10 @@
 package com.monstarmike.telemetry;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
+import com.google.common.io.ByteStreams;
 import com.monstarmike.tlmreader.Flight;
 import com.monstarmike.tlmreader.TLMReader;
 import com.monstarmike.tlmreader.datablock.*;
@@ -12,21 +15,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.io.IOException;
 
 /**
  * Created by mgardner on 5/15/2015.
  */
 public class TLMDecoder extends CordovaPlugin {
-
+    private static final String TAG = "TLMDecoder";
+    
     CallbackContext callbackContext;
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-
+        Log.i(TAG, "TLMDecoder action: " + action);
+    
         this.callbackContext = callbackContext;
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("file/*");
+        intent.setType("*/*");
         super.cordova.startActivityForResult(this, intent, 9988);
 
         return true;
@@ -34,10 +40,15 @@ public class TLMDecoder extends CordovaPlugin {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        Log.i(TAG, "TLMDecoder onActivityResult requestCode: " + requestCode + " - resultCode: " + resultCode);
+      
         if (requestCode == 9988) {
             try {
-                this.parseFile(intent.getDataString());
+                Uri fileUri = Uri.parse(intent.getDataString());
+                Log.d(TAG, "File URI: " + fileUri.toString());
+                this.parseFile(fileUri);
             } catch (IOException e) {
+                Log.e(TAG, "Error when parsing the file!", e);
                 e.printStackTrace();
             }
         }
@@ -45,24 +56,28 @@ public class TLMDecoder extends CordovaPlugin {
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
-    void parseFile(String path) throws IOException {
+    void parseFile(Uri uri) throws IOException {    
+        InputStream inputStream = super.cordova.getActivity().getContentResolver().openInputStream(uri);
+        byte[] bytes = ByteStreams.toByteArray(inputStream);
+        
         TLMReader reader = new TLMReader();
 
-        reader.Read(path);
+        reader.Read(bytes);
 
         JSONArray flightsArray = new JSONArray();
 
-
         for (Flight flight : reader) {
+            Log.d(TAG, "Have a flight.");
             JSONObject flightObject = new JSONObject();
+            
             try {
                 flightObject.put("duration", flight.get_duration().getMillis());
+                Log.d(TAG, "Duration: " + flight.get_duration().getMillis());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
             JSONArray blockArray = new JSONArray();
-
 
             for (Block b : flight) {
                 JSONObject blockJSON = new JSONObject();
@@ -95,7 +110,9 @@ public class TLMDecoder extends CordovaPlugin {
             flightsArray.put(flightObject);
         }
 
+        
         if (this.callbackContext != null) {
+            Log.d(TAG, "There is a callback context. Lets send the array back!");
             this.callbackContext.success(flightsArray);
         }
     }
