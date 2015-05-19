@@ -6,12 +6,18 @@ var argscheck = require('cordova/argscheck'),
 var TelemetryDecoder = function() {
 };
 
-TelemetryDecoder.decodeFile = function (pass, fail) {
-  exec(pass || function (result) {
+TelemetryDecoder.decodeFile = function (pass, fail) {  
+  exec(function (result) {
     console.log("Result:", result);
+    if (pass) {
+      pass(result);
+    }
   }, 
   function (e) {
     console.error("Error!", e);
+    if (fail) {
+      fail(e);
+    }
   }, "TLMDecoder", "decodeFile", []);
 };
 
