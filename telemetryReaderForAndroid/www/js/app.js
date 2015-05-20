@@ -6,8 +6,8 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid.controllers'])
 
-.run(function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
+.run(function ($ionicPlatform) {
+  $ionicPlatform.ready(function () {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
     if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -20,53 +20,34 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
   });
 })
 
-.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
   $stateProvider
 
-  .state('app', {
+    .state('app', {
     url: "/app",
     abstract: true,
     templateUrl: "templates/menu.html",
     controller: 'AppCtrl'
   })
 
-  .state('app.search', {
-    url: "/search",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/search.html"
-      }
-    }
-  })
-
   .state('app.altitude', {
-    url: "/altitude",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/altitude.html",
-          controller: 'AltitudeController'
-      }
-    }
-  })
-    .state('app.playlists', {
-      url: "/playlists",
+      url: "/altitude",
       views: {
         'menuContent': {
-          templateUrl: "templates/playlists.html",
-          controller: 'PlaylistsCtrl'
+          templateUrl: "templates/altitude.html",
+          controller: 'AltitudeController'
         }
       }
     })
 
-  .state('app.single', {
-    url: "/playlists/:playlistId",
-    views: {
-      'menuContent': {
-        templateUrl: "templates/playlist.html",
-        controller: 'PlaylistCtrl'
+    .state('app.welcome', {
+      url: "/welcome",
+      views: {
+        'menuContent': {
+          templateUrl: "templates/welcome.html"
+        }
       }
-    }
-  });
+    });
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/playlists');
+  $urlRouterProvider.otherwise('/app/welcome');
 }]);
