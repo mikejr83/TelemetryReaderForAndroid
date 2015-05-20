@@ -1,8 +1,7 @@
 <ion-view view-title="Altitude" enter="onEnter" loaded="onEnter">
   <ion-content>
     <h1>Altitude</h1>
-    <select ng-model="flight" ng-options="flight as flight.blocks.length for flight in flights" ng-change="selectedFlightChanged(flight)"></select>
-    <button ng-click="onEnter()">Test</button>
+    <select ng-model="flight" ng-options="flight as flight.name for flight in flights" ng-change="selectedFlightChanged(flight)"></select>
     <div class="grid-container">
         <figure style="width: 400px; height: 300px;" id="myChart"></figure>
     </div>
