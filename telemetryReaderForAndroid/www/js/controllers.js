@@ -1,6 +1,16 @@
 angular.module('telemetryReaderForAndroid.controllers', [])
-.service('dataService', ['$q', function ($q) {
+.service('dataService', ['$q', '$http', function ($q, $http) {
   this.currentData = null;
+    
+  this.getTestData = function () {
+    var deferred = $q.defer();
+      
+    $http.get('js/data.json').then(function(response) {
+       deferred.resolve(response.data); 
+    });
+      
+    return deferred.promise;
+  };
   
   this.loadData = function (storeAsCurrent) {
     var deferred = $q.defer(), that = this;
@@ -17,7 +27,10 @@ angular.module('telemetryReaderForAndroid.controllers', [])
         console.error(e);
       });
     } else {
-      deferred.reject('error\'d bitch. you gots to have your plugin around fool.');
+      this.getTestData().then(function(data) {
+         that.currentData = data;
+          deferred.resolve(data);
+      });
     }
     
     return deferred.promise;
@@ -47,26 +60,41 @@ angular.module('telemetryReaderForAndroid.controllers', [])
     });
   };
 }])
-.controller('AltitudeController', ['$scope', '$ionicView', 'dataService', function($scope, $ionicView, dataService) {
+.controller('AltitudeController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'dataService', 
+                                   function($scope, $window, $ionicLoading, $ionicScrollDelegate, dataService) {
   $scope.altitudeChartData = null;
   $scope.flights = [];
-  
-  $ionicView.enter = function() {
-    dataService.getCurrentData().then(function (data) { 
-      $scope.flights = data;
-    });
-  }
-  
-  $scope.selectedFlightChanged = function(flight) {
-    if (!flight) {
+  $scope.flight = null;
+                                       
+  $('.grid-container').resize(function () {
+     console.log('resized');
+     var figure = $('.grid-container figure');
+     figure.height(gridContainer.height());
+     figure.width(gridContainer.width());
+  });
+    
+  $scope.onEnter = function () {
+      $ionicLoading.show();
       dataService.getCurrentData().then(function (data) { 
+        $scope.flights = data;
         if (data && data[0]) {
-          $scope.selectedFlightChanged(data[0]); 
+          $scope.flight = data[0];
+            $scope.selectedFlightChanged(data[0]);
+        } else {
+            $ionicLoading.hide();
         }
       });
-      return;
-    }
+  }
+  
+  $scope.selectedFlightChanged = function(f) {
+    $ionicLoading.show();
     
+    if (f) {
+        $scope.flight = f;
+    } else {
+        return;
+    }
+      
     $scope.altitudeChartData = {
       "xScale": "linear",
       "yScale": "linear",
@@ -77,7 +105,7 @@ angular.module('telemetryReaderForAndroid.controllers', [])
       }]
     };
     
-    _.forEach(flight.blocks, function(block) {
+    _.forEach($scope.flight.blocks, function(block) {
       if (block.blockType !== 'AltitudeBlock') return;
       
       $scope.altitudeChartData.main[0].data.push({
@@ -89,9 +117,9 @@ angular.module('telemetryReaderForAndroid.controllers', [])
     $scope.altitudeChartData.xMin = $scope.altitudeChartData.main[0].data[0].x;
     $scope.altitudeChartData.xMax = $scope.altitudeChartData.main[0].data[$scope.altitudeChartData.main[0].data.length - 1].x;
     
-    console.log('altitudeChartData', $scope.altitudeChartData);
-    
     var altitudeChart = new xChart('line', $scope.altitudeChartData, '#myChart');
+      
+    $ionicLoading.hide();
   };
 }])
 
