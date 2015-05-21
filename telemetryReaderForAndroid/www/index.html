@@ -28,7 +28,20 @@
     
     <!-- your app's js -->
     <script src="js/app.js"></script>
+    <script src="js/services.js"></script>
     <script src="js/controllers.js"></script>
+    <script type="text/javascript">
+      var $HandleResize = function () {
+        var gridContainer = $('ion-content');
+        console.log('resized');
+        var figure = $('.grid-container figure');
+        figure.height(gridContainer.height() - 30);
+        figure.width(gridContainer.width() - 30);
+      }
+
+      $(window).resize($HandleResize);
+      $(document).ready($HandleResize);
+    </script>
   </head>
 
   <body ng-app="telemetryReaderForAndroid">

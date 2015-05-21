@@ -1,7 +1,7 @@
 <ion-view view-title="Altitude">
   <ion-content>
     <h1>Altitude</h1>
-    <select ng-model="flight" ng-options="flight as flight.name for flight in service.flights" ng-change="selectedFlightChanged(flight)"></select>
+    <select ng-model="service.selectedFlight" ng-options="flight as flight.name for flight in service.flights" ng-change="selectedFlightChanged()"></select>
     <div class="grid-container">
         <figure style="width: 400px; height: 300px;" id="myChart"></figure>
     </div>
