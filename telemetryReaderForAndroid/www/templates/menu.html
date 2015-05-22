@@ -21,13 +21,16 @@
         <ion-item menu-close ng-click="doGetDataFile()">
           Load Data File
         </ion-item>
-        <ion-item menu-close href="#/app/altitude">
+        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('altitude', 'Altitude')">
           Altitude
         </ion-item>
-          <ion-item menu-close href="#/app/current">
+        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('current', 'Current')">
           Current
         </ion-item>
-          <ion-item menu-close href="#/app/rx">
+        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('powerbox', 'PowerBox')">
+          PowerBox
+        </ion-item>
+        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('rx', 'RX')">
           RX
         </ion-item>
       </ion-list>

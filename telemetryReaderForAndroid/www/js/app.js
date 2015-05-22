@@ -29,39 +29,12 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
     templateUrl: "templates/menu.html",
     controller: 'AppCtrl'
   })
-  .state('app.airspeed', {
-      url: "/airspeed",
+  .state('app.telemetry', {
+      url: "/telemetry",
       views: {
         'menuContent': {
-          templateUrl: "templates/telemetry/airspeed.html",
-          controller: 'AltitudeController'
-        }
-      }
-    })
-  .state('app.altitude', {
-      url: "/altitude",
-      views: {
-        'menuContent': {
-          templateUrl: "templates/telemetry/altitude.html",
-          controller: 'AltitudeController'
-        }
-      }
-    })
-    .state('app.current', {
-      url: "/current",
-      views: {
-        'menuContent': {
-          templateUrl: "templates/telemetry/current.html",
-          controller: 'CurrentController'
-        }
-      }
-    })
-  .state('app.rx', {
-      url: "/rx",
-      views: {
-        'menuContent': {
-          templateUrl: "templates/telemetry/rx.html",
-          controller: 'RXController'
+          templateUrl: "templates/telemetry/telemetry.html",
+          controller: 'TelemetryViewerController'
         }
       }
     })

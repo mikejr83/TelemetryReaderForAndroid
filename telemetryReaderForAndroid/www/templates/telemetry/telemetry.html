@@ -1,4 +1,4 @@
-<ion-view view-title="Terst">
+<ion-view view-title="{{service.selectedTitle}}">
   <ion-content>
       <select ng-model="service.selectedFlight" ng-options="flight as flight.name for flight in service.flights" ng-change="selectedFlightChanged()"></select>
     <div class="grid-container">
