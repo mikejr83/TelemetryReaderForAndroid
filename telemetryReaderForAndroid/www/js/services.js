@@ -43,137 +43,86 @@ angular.module('telemetryReaderForAndroid.services', [])
 
         flight.flightData = {
           "altitude": {
-            opts: {
-              "tickFormatX": timeTickFormatter,
-              "tickFormatY": function (y) {
-                y = y / 10;
-                return y + 'm';
-              }
-            },
-            dataSet: {
-              "xScale": "linear",
-              "yScale": "linear",
-              "type": "line",
-              "main": [{
-                "className": ".altitude",
-                "data": []
-              }]
-            }
+              "type": "serial",
+              "categoryField": "timestamp",
+              "startDuration": 1,
+              "theme": "light",
+              "categoryAxis": {
+                  "gridPosition": "start",
+                  "labelFunction": function (value, serialDataItem, categoryAxis) {
+                      return timeTickFormatter(value);
+                  }
+              },
+              "trendLines": [],
+              "graphs": [
+                  {
+                      "balloonText": "[[value]]",
+                      "id": "am-altitude",
+                      "title": "Altitude",
+                      "valueAxis": "altitudeAxis",
+                      "valueField": "altitude"
+                  }
+              ],
+              "valueAxes": [
+                  {
+                      "id": "altitudeAxis",
+                      "integersOnly": true,
+                      "title": "Altitude",
+                      "labelFunction": function (value, valueText, valueAxis) {
+                          if (valueAxis.id == 'altitudeAxis') {
+                              return (value / 10) + 'm';
+                          } else {
+                              return valueText;
+                          }
+                      }
+                  }
+              ],
+              "legend": {
+                  "useGraphSettings": true
+              },
+              "titles": [
+                  {
+                      "id": "Title-1",
+                      "size": 15,
+                      "text": "Altitude"
+                  }
+              ],
+              "dataProvider": []
           },
           "current": {
-            "opts": {
-              "tickFormatX": timeTickFormatter,
-              "tickFormatY": function (y) {
-                y = y * 10;
-                return y;
-              }
-            },
-            "dataSet": {
-              "xScale": "linear",
-              "yScale": "linear",
-              "type": "line",
-              "main": [{
-                "className": ".current",
-                "data": []
-                }]
-            }
+            
           },
           "powerbox": {
-            "opts": {
-              "tickFormatX": timeTickFormatter
-            },
-            "dataSet": {
-              "xScale": "linear",
-              "yScale": "linear",
-              "type": "line",
-              "main": [{
-                "className": ".powerbox-capacityOne",
-                "data": []
-                }],
-              "comp": [{
-                "className": ".powerbox-voltageOne",
-                "type": "line",
-                "data": []
-              }]
-            }
+            
           },
           "rx": {
-            "opts": {
-              "tickFormatX": timeTickFormatter
-            },
-            "dataSet": {
-              "xScale": "linear",
-              "yScale": "linear",
-              "type": "line",
-              "main": [{
-                "className": ".rx-a",
-                "data": []
-                }],
-              "comp": [{
-                "className": "",
-                "type": "line",
-                "data": []
-              }]
-            }
-
-            //                {
-            //                  "className": ".rx-b",
-            //                  "data": []
-            //      },
-            //                {
-            //                  "className": ".rx-frameLoss",
-            //                  "data": []
-            //      },
-            //                {
-            //                  "className": ".rx-holds",
-            //                  "data": []
-            //      },
-            //                {
-            //                  "className": ".rx-l",
-            //                  "data": []
-            //      },
-            //                {
-            //                  "className": ".rx-r",
-            //                  "data": []
-            //      },
-            //                {
-            //                  "className": ".rx-volts",
-            //                  "data": []
-            //      }]
-            //            }
           }
         };
 
         var altitude = function (block) {
-          flight.flightData['altitude'].dataSet.main[0].data.push({
-            "x": block.timestamp,
-            "y": block.altitude
-          });
+          flight.flightData['altitude'].dataProvider.push(block);
         };
 
         var current = function (block) {
-          flight.flightData['current'].dataSet.main[0].data.push({
-            "x": block.timestamp,
-            "y": block.current
-          });
+//          flight.flightData['current'].charts[0].dataProvider.push(block);
         };
 
         var powerbox = function (block) {
-          flight.flightData['powerbox'].dataSet.main[0].data.push({
-            "x": block.timestamp,
-            "y": block.capacityOne
-          });
-          flight.flightData['powerbox'].dataSet.comp[0].data.push({
-            "x": block.timestamp,
-            "y": block.voltageOne
-          });
+//          flight.flightData['powerbox'].dataSet.main[0].data.push({
+//            "x": block.timestamp,
+//            "y": block.capacityOne
+//          });
+//          flight.flightData['powerbox'].dataSet.comp[0].data.push({
+//            "x": block.timestamp,
+//            "y": block.voltageOne
+//          });
         };
 
         var rx = function (block) {
-          flight.flightData['rx'].dataSet.main[0].data.push({
-            "x": block.timestamp,
-            "y": block.a || 0
-          });
+//          flight.flightData['rx'].dataSet.main[0].data.push({
+//            "x": block.timestamp,
+//            "y": block.a || 0
+//          });
           //          flight.flightData['rx'].dataSet.main[1].data.push({
           //            "x": block.timestamp,
           //            "y": block.b || 0
@@ -194,10 +143,10 @@ angular.module('telemetryReaderForAndroid.services', [])
           //            "x": block.timestamp,
           //            "y": block.r || 0
           //          });
-          flight.flightData['rx'].dataSet.comp[0].data.push({
-            "x": block.timestamp,
-            "y": block.volts || 0
-          });
+//          flight.flightData['rx'].dataSet.comp[0].data.push({
+//            "x": block.timestamp,
+//            "y": block.volts || 0
+//          });
         };
         var done = false;
         _.forEach(flight.blocks, function (block) {
