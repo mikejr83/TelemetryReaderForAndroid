@@ -15,6 +15,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
     $scope.setTelemetryType = function (key, title) {
       dataService.selectedKey = key;
       dataService.selectedTitle = title;
+        dataService.chart = null;
     }
 }])
   .controller('TelemetryViewerController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'dataService',
@@ -31,6 +32,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         if (!$scope.service.selectedKey)
           $scope.service.selectedKey = 'current';
 
+          
         if (!$scope.service.flights) {
           $ionicLoading.show();
           dataService.getCurrentData().then(function (data) {
@@ -42,7 +44,6 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
             }
           });
         } else {
-          $scope.chart = null;
           $scope.selectedFlightChanged();
         }
       });
@@ -59,13 +60,25 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         //        $scope.chartData.xMin = $scope.chartData.main[0].data[0].x;
         //        $scope.chartData.xMax = $scope.chartData.main[0].data[$scope.chartData.main[0].data.length - 1].x;
         console.log('selectedKey', $scope.service.selectedKey);
-        console.log('dataSet', $scope.service.selectedFlight.flightData[$scope.service.selectedKey].dataSet);
-        console.log('opts', $scope.service.selectedFlight.flightData[$scope.service.selectedKey].opts);
-        $scope.chart = new xChart('line',
+        console.log('flightdata', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+//        console.log('opts', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+        /*$scope.chart = new xChart('line',
           $scope.service.selectedFlight.flightData[$scope.service.selectedKey].dataSet,
           '#myChart',
-          $scope.service.selectedFlight.flightData[$scope.service.selectedKey].opts);
+          $scope.service.selectedFlight.flightData[$scope.service.selectedKey].opts);*/
+          $scope.service.selectedFlight.flightData[$scope.service.selectedKey].chartData.bindto = '#chart';
+          
+        if (!$scope.chart) {
+            console.log('creating chart')
+            $scope.service.chart = c3.generate($scope.service.selectedFlight.flightData[$scope.service.selectedKey].chartData);    
+        } else {
+            console.log('loading chart')
+            $scope.service.chart.load({
+                "columns": $scope.service.selectedFlight.flightData[$scope.service.selectedKey].chartData.data.columns
+            });
+        }
 
+          console.log('chart', $scope.chart);
         $ionicLoading.hide();
       };
 

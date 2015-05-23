@@ -4,8 +4,10 @@ angular.module('telemetryReaderForAndroid.services', [])
     this.selectedFlight = null;
     this.selectedKey = 'altitude';
     this.selectedTitle = 'Altitude';
-
+    this.displayMetric = true;
+      
     this._setCurrentData = function (data) {
+        var that = this;
       this.flights = data;
       _.forEach(this.flights, function (flight, index) {
         if (!flight.name) {
@@ -28,37 +30,66 @@ angular.module('telemetryReaderForAndroid.services', [])
 
           flight.name = 'Flight ' + (index + 1) + ' - ' + durationStr;
         }
-
-        var timeTickFormatter = function (x) {
-          var durationObj = moment.duration(x * 10);
-          var durationStr = '';
-
-          if (durationObj.hours() > 0) durationStr = durationObj.hours() + ':';
-
-          durationStr += durationObj.minutes() > 0 ? (durationObj.minutes() + ':') : '0:';
-          durationStr += durationObj.seconds() > 0 ? (durationObj.seconds() + ':') : '00.';
-          durationStr += durationObj.milliseconds() > 0 ? (durationObj.milliseconds()) : '0';
-          return durationStr;
+          
+        var xAxis = {
+                          "label": {
+                              "text": "Time",
+                              "position": "inner-left"
+                          }, 
+                          "tick": {
+                              "count": 10,
+                              "format": function (x) {
+                                  var durationObj = moment.duration(x * 10);
+                                  var durationStr = '';
+                                  
+                                  if (durationObj.hours() > 0) {
+                                      durationStr = durationObj.hours() + ':';
+                                  }
+                                  
+                                  durationStr += durationObj.minutes() > 0 ? (durationObj.minutes() + ':') : '0:';
+                                  durationStr += durationObj.seconds() > 0 ? (durationObj.seconds() + '.') : '00.';
+                                  durationStr += durationObj.milliseconds() > 0 ? (Math.floor(durationObj.milliseconds())) : '0';
+                                  
+                                  return durationStr;
+                              }
+                          }
         };
+          
+          var timeTickFormatter = function(x){};
 
         flight.flightData = {
           "altitude": {
-            opts: {
-              "tickFormatX": timeTickFormatter,
-              "tickFormatY": function (y) {
-                y = y / 10;
-                return y + 'm';
-              }
-            },
-            dataSet: {
-              "xScale": "linear",
-              "yScale": "linear",
-              "type": "line",
-              "main": [{
-                "className": ".altitude",
-                "data": []
-              }]
-            }
+              "chartData": {
+                  "data": {
+                      "xs": {
+                          "Altitude": "x1"
+                      },
+                      "columns": [
+                          ['x1'],
+                          ['Altitude']
+                      ]
+                  },
+                  "axis": {
+                      "x": xAxis,
+                      "y": {
+                          "label": "Altitude",
+                          "tick": {
+                              format: function (y) {
+                                  var label = '';
+                                  if(that.displayMetric) {
+                                      label = (y / 10) + 'm';
+                                  } else {
+                                      label = (Math.floor(y / 10 * 3.28)) + 'ft';
+                                  }
+                                  return label;
+                              }
+                          }
+                      }
+                  },
+                  "point": {
+                      "show": false
+                  }
+              },
           },
           "current": {
             "opts": {
@@ -79,23 +110,45 @@ angular.module('telemetryReaderForAndroid.services', [])
             }
           },
           "powerbox": {
-            "opts": {
-              "tickFormatX": timeTickFormatter
-            },
-            "dataSet": {
-              "xScale": "linear",
-              "yScale": "linear",
-              "type": "line",
-              "main": [{
-                "className": ".powerbox-capacityOne",
-                "data": []
-                }],
-              "comp": [{
-                "className": ".powerbox-voltageOne",
-                "type": "line",
-                "data": []
-              }]
-            }
+              "chartData": {
+                  "data": {
+                      "xs": {
+                          "VoltageOne": "x1",
+                          "CapacityOne": "x1",
+                          "VoltageTwo": "x1",
+                          "CapacityTwo": "x1"
+                      },
+                      "columns": [
+                          ['x1'],
+                          ['VoltageOne'],
+                          ['CapacityOne'],
+                          ['VoltageTwo'],
+                          ['CapacityTwo']
+                      ]
+                  },
+                  "axis": {
+                      "x": xAxis,
+                      "y": {
+                          "label": "mAh",
+                          "tick": {
+                              format: function (y) {
+                                  return y;
+                              }
+                          }
+                      },
+                      "y2": {
+                          "label": "Volts",
+                          "tick": {
+                              format: function (y) {
+                                  return y;
+                              }
+                          }
+                      }
+                  },
+                  "point": {
+                      "show": false
+                  }
+              },
           },
           "rx": {
             "opts": {
@@ -145,28 +198,35 @@ angular.module('telemetryReaderForAndroid.services', [])
         };
 
         var altitude = function (block) {
-          flight.flightData['altitude'].dataSet.main[0].data.push({
+          /*flight.flightData['altitude'].dataSet.main[0].data.push({
             "x": block.timestamp,
             "y": block.altitude
-          });
+          });*/
+            flight.flightData['altitude'].chartData.data.columns[0].push(block.timestamp);
+            flight.flightData['altitude'].chartData.data.columns[1].push(block.altitude);
         };
 
         var current = function (block) {
-          flight.flightData['current'].dataSet.main[0].data.push({
+          /*flight.flightData['current'].dataSet.main[0].data.push({
             "x": block.timestamp,
             "y": block.current
-          });
+          });*/
         };
 
         var powerbox = function (block) {
-          flight.flightData['powerbox'].dataSet.main[0].data.push({
+         /* flight.flightData['powerbox'].dataSet.main[0].data.push({
             "x": block.timestamp,
             "y": block.capacityOne
           });
           flight.flightData['powerbox'].dataSet.comp[0].data.push({
             "x": block.timestamp,
             "y": block.voltageOne
-          });
+          });*/
+            flight.flightData['powerbox'].chartData.data.columns[0].push(block.timestamp);
+            flight.flightData['powerbox'].chartData.data.columns[1].push(block.voltageOne);
+            flight.flightData['powerbox'].chartData.data.columns[2].push(block.capacityOne);
+            flight.flightData['powerbox'].chartData.data.columns[3].push(block.voltageTwo);
+            flight.flightData['powerbox'].chartData.data.columns[4].push(block.capacityTwo);
         };
 
         var rx = function (block) {
