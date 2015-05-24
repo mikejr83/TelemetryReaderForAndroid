@@ -15,6 +15,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
     $scope.setTelemetryType = function (key, title) {
       dataService.selectedKey = key;
       dataService.selectedTitle = title;
+        dataService.chart = null;
     }
 }])
   .controller('TelemetryViewerController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'dataService',
@@ -42,7 +43,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
             }
           });
         } else {
-          $scope.chart = null;
+          $scope.service.chart = null;
           $scope.selectedFlightChanged();
         }
       });
@@ -56,11 +57,11 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           return;
         }
           
-          if ($scope.chart) {
-              $scope.chart.dataProvider = $scope.service.selectedFlight.flightData[$scope.service.selectedKey].dataProvider;
-              $scope.chart.validateData();
+          if ($scope.service.chart) {
+              $scope.service.chart.dataProvider = $scope.service.selectedFlight.flightData[$scope.service.selectedKey].dataProvider;
+              $scope.service.chart.validateData();
           } else {
-              $scope.chart = AmCharts.makeChart('myChart', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+              $scope.service.chart = AmCharts.makeChart('myChart', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
           }
 
         $ionicLoading.hide();
