@@ -165,25 +165,17 @@ angular.module('telemetryReaderForAndroid.services')
             {
               "id": "capacityAxis",
               "title": "Capacity (mAh)",
-              //                      "labelFunction": function (value, valueText, valueAxis) {
-              //                          if (valueAxis.id == 'altitudeAxis') {
-              //                              return (value / 10) + 'm';
-              //                          } else {
-              //                              return valueText;
-              //                          }
-              //                      }
-                  },
+              "labelFunction": function (value, valueText, valueAxis) {
+                return valueText + ' mAh';
+              }
+            },
             {
               "id": "voltageAxis",
               "title": "Volts",
-              "position": "right"
-                /*"labelFunction": function (value, valueText, valueAxis) {
-                    if (valueAxis.id == 'altitudeAxis') {
-                        return (value / 10) + 'm';
-                    } else {
-                        return valueText;
-                    }
-                }*/
+              "position": "right",
+//              "labelFunction": function (value, valueText, valueAxis) {
+//                return (value / 100);
+//              }
                   }
               ],
           "legend": {
@@ -206,44 +198,65 @@ angular.module('telemetryReaderForAndroid.services')
           "categoryAxis": {
             "gridPosition": "start",
             "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return timeTickFormatter(value);
+              return _timeTickFormatter(value);
             }
           },
           "trendLines": [],
           "graphs": [
             {
               "balloonText": "[[value]]",
-              "id": "am-capacityOne",
-              "title": "Capacity One",
-              "valueAxis": "capacityAxis",
+              "id": "am-rx-a",
+              "title": "A",
+              "valueAxis": "signalAxis",
               "valueField": "a"
-                  },
+            },
             {
               "balloonText": "[[value]]",
-              "id": "am-capacityTwo",
-              "title": "Capacity Two",
-              "valueAxis": "capacityAxis",
+              "id": "am-rx-b",
+              "title": "B",
+              "valueAxis": "signalAxis",
               "valueField": "b"
-                  },
+            },
             {
               "balloonText": "[[value]]",
-              "id": "am-voltageOne",
-              "title": "Voltage One",
-              "valueAxis": "voltageAxis",
+              "id": "am-rx-l",
+              "title": "L",
+              "valueAxis": "signalAxis",
+              "valueField": "l"
+            },
+            {
+              "balloonText": "[[value]]",
+              "id": "am-rx-r",
+              "title": "R",
+              "valueAxis": "signalAxis",
+              "valueField": "r"
+            },
+            {
+              "balloonText": "[[value]]",
+              "id": "am-rx-frameLoss",
+              "title": "Frame Loss",
+              "valueAxis": "frameAndHoldsAxis",
               "valueField": "frameLoss"
-                  },
+            },
             {
               "balloonText": "[[value]]",
-              "id": "am-voltageTwo",
-              "title": "Voltage Two",
-              "valueAxis": "voltageAxis",
+              "id": "am-rx-holds",
+              "title": "Holds",
+              "valueAxis": "frameAndHoldsAxis",
               "valueField": "holds"
-                  }
-              ],
+            },
+            {
+              "balloonText": "[[value]]",
+              "id": "am-rx-holds",
+              "title": "RX Voltage",
+              "valueAxis": "voltageAxis",
+              "valueField": "volts"
+            }
+          ],
           "valueAxes": [
             {
-              "id": "capacityAxis",
-              "title": "Capacity (mAh)",
+              "id": "rxVoltsAxis",
+              "title": "Volts",
               //                      "labelFunction": function (value, valueText, valueAxis) {
               //                          if (valueAxis.id == 'altitudeAxis') {
               //                              return (value / 10) + 'm';
@@ -253,18 +266,15 @@ angular.module('telemetryReaderForAndroid.services')
               //                      }
                   },
             {
-              "id": "voltageAxis",
-              "title": "Volts",
+              "id": "signalAxis",
+              "title": "S Count",
               "position": "right"
-                /*"labelFunction": function (value, valueText, valueAxis) {
-                    if (valueAxis.id == 'altitudeAxis') {
-                        return (value / 10) + 'm';
-                    } else {
-                        return valueText;
-                    }
-                }*/
-                  }
-              ],
+            },
+            {
+              "id": "frameAndHoldsAxis",
+              "title": "Count"
+            }
+          ],
           "legend": {
             "useGraphSettings": true
           },
@@ -272,7 +282,7 @@ angular.module('telemetryReaderForAndroid.services')
             {
               "id": "Title-1",
               "size": 15,
-              "text": "PowerBox"
+              "text": "RX"
                   }
               ],
           "dataProvider": []
@@ -290,7 +300,74 @@ angular.module('telemetryReaderForAndroid.services')
             }
           },
           "trendLines": [],
-          "graphs": [],
+          "graphs": [
+            {
+              "balloonText": "[[value]]",
+              "id": "am-rpm",
+              "title": "RPM",
+              "valueAxis": "rpmAxis",
+              "valueField": "rpm"
+            },
+            {
+              "balloonText": "[[value]]",
+              "id": "am-temperature",
+              "title": "Temperature",
+              "valueAxis": "temperatureAxis",
+              "valueField": "temperature"
+            },
+            {
+              "balloonText": "[[value]]",
+              "id": "am-voltage",
+              "title": "RX Voltage",
+              "valueAxis": "voltageAxis",
+              "valueField": "volt"
+            }
+          ],
+          "legend": {
+            "useGraphSettings": true
+          },
+          "valueAxes": [
+            {
+              "id": "rpmAxis",
+              "title": "RPM",
+              //                      "labelFunction": function (value, valueText, valueAxis) {
+              //                          if (valueAxis.id == 'altitudeAxis') {
+              //                              return (value / 10) + 'm';
+              //                          } else {
+              //                              return valueText;
+              //                          }
+              //                      }
+                  },
+            {
+              "id": "voltageAxis",
+              "title": "Volts",
+              //                      "labelFunction": function (value, valueText, valueAxis) {
+              //                          if (valueAxis.id == 'altitudeAxis') {
+              //                              return (value / 10) + 'm';
+              //                          } else {
+              //                              return valueText;
+              //                          }
+              //                      }
+                  },
+            {
+              "id": "temperatureAxis",
+              "title": "Temperature",
+              //                      "labelFunction": function (value, valueText, valueAxis) {
+              //                          if (valueAxis.id == 'altitudeAxis') {
+              //                              return (value / 10) + 'm';
+              //                          } else {
+              //                              return valueText;
+              //                          }
+              //                      }
+                  }
+          ],
+          "titles": [
+            {
+              "id": "Title-1",
+              "size": 15,
+              "text": "Standard"
+                  }
+              ],
           "dataProvider": []
         },
         "vario": {
@@ -307,6 +384,16 @@ angular.module('telemetryReaderForAndroid.services')
           },
           "trendLines": [],
           "graphs": [],
+          "legend": {
+            "useGraphSettings": true
+          },
+          "titles": [
+            {
+              "id": "Title-1",
+              "size": 15,
+              "text": "Vario"
+                  }
+              ],
           "dataProvider": []
         }
       };

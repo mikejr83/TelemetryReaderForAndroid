@@ -32,16 +32,19 @@ angular.module('telemetryReaderForAndroid.services', [])
 
         flight.flightData = chartDefinitionsService.getChartDefinitions(flight.blocks.length > 8 ? flight.blocks[8].timestamp * 10 : 0);
           
-        var done = false;
+        var done = {};
         _.forEach(flight.blocks, function (block, index) {
           if (index < 8) return;
           
           var key = block.blockType.toLowerCase().substring(0, block.blockType.length - 5);
-          
-          if(!flight.flightData[key])return;
+          if(!done[key]) done[key] = 0;
+          done[key]++;
+          if(!flight.flightData[key]) {
+            console.log(key);
+            return;
+          }
           flight.flightData[key].dataProvider.push(block);
         });
-
       });
     };
 

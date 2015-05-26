@@ -1,8 +1,11 @@
 <ion-view view-title="{{service.selectedTitle}}">
   <ion-content>
       <select ng-model="service.selectedFlight" ng-options="flight as flight.name for flight in service.flights" ng-change="selectedFlightChanged()"></select>
-    <div class="grid-container">
+    <div class="grid-container" ng-show="service.chart.dataProvider">
         <figure id="myChart"></figure>
+    </div>
+    <div ng-hide="service.chart.dataProvider">
+      There was no telemetry recorded for these sensors.
     </div>
   </ion-content>
 </ion-view>
