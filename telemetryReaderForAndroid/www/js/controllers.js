@@ -59,12 +59,9 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         //        $scope.chartData.xMin = $scope.chartData.main[0].data[0].x;
         //        $scope.chartData.xMax = $scope.chartData.main[0].data[$scope.chartData.main[0].data.length - 1].x;
         console.log('selectedKey', $scope.service.selectedKey);
-        console.log('dataSet', $scope.service.selectedFlight.flightData[$scope.service.selectedKey].dataSet);
-        console.log('opts', $scope.service.selectedFlight.flightData[$scope.service.selectedKey].opts);
-        $scope.chart = new xChart('line',
-          $scope.service.selectedFlight.flightData[$scope.service.selectedKey].dataSet,
-          '#myChart',
-          $scope.service.selectedFlight.flightData[$scope.service.selectedKey].opts);
+        console.log('chartOptions', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+        $scope.chart =new CanvasJS.Chart("myChart", $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+        $scope.chart.render();
 
         $ionicLoading.hide();
       };
