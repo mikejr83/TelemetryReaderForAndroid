@@ -1,14 +1,16 @@
 angular.module('telemetryReaderForAndroid.services', [])
-.service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
+  .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
     this.flights = null;
     this.selectedFlight = null;
     this.selectedKey = 'altitude';
     this.selectedTitle = 'Altitude';
-      this.chart = null;
-      
+    this.chart = null;
+
     this._setCurrentData = function (data) {
       this.flights = data;
       _.forEach(this.flights, function (flight, index) {
+        //        if (!flight.blocks || flight.blocks.length == 8) return;
+
         if (!flight.name) {
           var duration = flight.duration;
           if (!flight.duration && flight.blocks.length > 8) {
@@ -31,21 +33,86 @@ angular.module('telemetryReaderForAndroid.services', [])
         }
 
         flight.flightData = chartDefinitionsService.getChartDefinitions(flight.blocks.length > 8 ? flight.blocks[8].timestamp * 10 : 0);
-        
+
         var converter = {
-          "altitude": function(chartOptions, block) {
-            chartOptions.data[0].dataPoints.push({x:block.timestamp, y:block.altitude});
+          "altitude": function (chartOptions, block) {
+            chartOptions.data[0].dataPoints.push({
+              x: block.timestamp,
+              y: block.altitude
+            });
+          },
+          "current": function (chartOptions, block) {
+            chartOptions.data[0].dataPoints.push({
+              x: block.timestamp,
+              y: block.current
+            });
+          },
+          "gforce": function (chartOptions, block) {
+
+          },
+          "powerbox": function (chartOptions, block) {
+            chartOptions.data[0].dataPoints.push({
+              x: block.timestamp,
+              y: block.voltageOne
+            });
+            chartOptions.data[1].dataPoints.push({
+              x: block.timestamp,
+              y: block.voltageTwo
+            });
+            chartOptions.data[2].dataPoints.push({
+              x: block.timestamp,
+              y: block.capacityOne
+            });
+            chartOptions.data[3].dataPoints.push({
+              x: block.timestamp,
+              y: block.capacityTwo
+            });
+          },
+          "rx": function (chartOptions, block) {
+            chartOptions.data[0].dataPoints.push({
+              x: block.timestamp,
+              y: block.a
+            });
+            chartOptions.data[1].dataPoints.push({
+              x: block.timestamp,
+              y: block.b
+            });
+            chartOptions.data[2].dataPoints.push({
+              x: block.timestamp,
+              y: block.l
+            });
+            chartOptions.data[3].dataPoints.push({
+              x: block.timestamp,
+              y: block.r
+            });
+            chartOptions.data[4].dataPoints.push({
+              x: block.timestamp,
+              y: block.frameLoss
+            });
+            chartOptions.data[5].dataPoints.push({
+              x: block.timestamp,
+              y: block.holds
+            });
+            chartOptions.data[6].dataPoints.push({
+              x: block.timestamp,
+              y: block.volts
+            });
+          },
+          "standard": function (chartOptions, block) {
+
           }
         }
-          
+
         var done = {};
         _.forEach(flight.blocks, function (block, index) {
           if (index < 8) return;
-          
+
           var key = block.blockType.toLowerCase().substring(0, block.blockType.length - 5);
-          
-          if(key === "altitude")
+
+          if (converter[key]) {
             converter[key](flight.flightData[key], block);
+          }
+
         });
       });
     };

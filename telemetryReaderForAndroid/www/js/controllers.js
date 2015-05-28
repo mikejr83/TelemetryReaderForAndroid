@@ -2,7 +2,8 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
   .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', 'dataService', function ($scope, $ionicModal, $timeout, dataService) {
     $scope.doGetDataFile = function () {
       console.log('get data file');
-      dataService.loadData().then(function (data) {
+
+        dataService.loadData().then(function (data) {
         if (dataService.flgiths && dataService.flights.length > 0) {
           dataService.selectedFlight = dataService.flights[0];
         } else {
@@ -60,7 +61,12 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         //        $scope.chartData.xMax = $scope.chartData.main[0].data[$scope.chartData.main[0].data.length - 1].x;
         console.log('selectedKey', $scope.service.selectedKey);
         console.log('chartOptions', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
-        $scope.chart =new CanvasJS.Chart("myChart", $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+        if (!$scope.chart) {
+          $scope.chart = new CanvasJS.Chart("myChart", $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
+        } else {
+          $scope.chart.options = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
+        }
+
         $scope.chart.render();
 
         $ionicLoading.hide();

@@ -15,12 +15,13 @@ angular.module('telemetryReaderForAndroid.services')
 
       return {
         "altitude": {
+          "animationEnabled": true,
           "title": {
             "text": "Altitude"
           },
           "axisX": {
             "title": "Time",
-            "labelFormatter": function(e) {
+            "labelFormatter": function (e) {
               return _timeTickFormatter(e.value);
             }
           },
@@ -44,44 +45,35 @@ angular.module('telemetryReaderForAndroid.services')
           ]
         },
         "current": {
-          "type": "serial",
-          "categoryField": "timestamp",
-          "startDuration": 1,
-          "startEffect": "easeOutSine",
-          "theme": "light",
-          "categoryAxis": {
-            "gridPosition": "start",
-            "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return _timeTickFormatter(value);
+          "animationEnabled": true,
+          "title": {
+            "text": "Current"
+          },
+          "axisX": {
+            "title": "Time",
+            "labelFormatter": function (e) {
+              return _timeTickFormatter(e.value);
             }
           },
-          "trendLines": [],
-          "graphs": [
-            {
-              "balloonText": "[[value]]",
-              "id": "am-current",
-              "title": "Current",
-              "valueAxis": "currentAxis",
-              "valueField": "current"
-      }
-      ],
-          "valueAxes": [
-            {
-              "id": "currentAxis",
-              "title": "Current"
-        }
-      ],
-          "legend": {
-            "useGraphSettings": true
+          "axisY": {
+            "title": "Current (mA)",
+            "labelFormatter": function (e) {
+              return (e.value / 10) + 'A'
+            }
           },
-          "titles": [
+          "toolTip": {
+            "contentFormatter": function (e) {
+              var dataPoint = e.entries[0].dataPoint;
+              return (dataPoint.y / 10) + 'A (' + _timeTickFormatter(dataPoint.x) + ')';
+            }
+          },
+          "data": [
             {
-              "id": "Title-1",
-              "size": 15,
-              "text": "Current"
-        }
-      ],
-          "dataProvider": []
+              "name": "Current",
+              "type": "line",
+              "dataPoints": []
+            }
+          ]
         },
         "gforce": {
           "type": "serial",
@@ -100,173 +92,151 @@ angular.module('telemetryReaderForAndroid.services')
           "dataProvider": []
         },
         "powerbox": {
-          "type": "serial",
-          "categoryField": "timestamp",
-          "startDuration": 1,
-          "startEffect": "easeOutSine",
-          "theme": "light",
-          "categoryAxis": {
-            "gridPosition": "start",
-            "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return _timeTickFormatter(value);
+          "animationEnabled": true,
+          "title": {
+            "text": "PowerBox"
+          },
+          "legend": {
+            "horizontalAlign": "center", // "center" , "right"
+            "verticalAlign": "bottom", // "top" , "bottom"
+//            "fontSize": 15
+          },
+          "axisX": {
+            "title": "Time",
+            "labelFormatter": function (e) {
+              return _timeTickFormatter(e.value);
             }
           },
-          "trendLines": [],
-          "graphs": [
-            {
-              "balloonText": "[[value]]",
-              "id": "am-capacityOne",
-              "title": "Capacity One",
-              "valueAxis": "capacityAxis",
-              "valueField": "capacityOne"
-                  },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-capacityTwo",
-              "title": "Capacity Two",
-              "valueAxis": "capacityAxis",
-              "valueField": "capacityTwo"
-                  },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-voltageOne",
-              "title": "Voltage One",
-              "valueAxis": "voltageAxis",
-              "valueField": "voltageOne"
-                  },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-voltageTwo",
-              "title": "Voltage Two",
-              "valueAxis": "voltageAxis",
-              "valueField": "voltageTwo"
-                  }
-              ],
-          "valueAxes": [
-            {
-              "id": "capacityAxis",
-              "title": "Capacity (mAh)",
-              "labelFunction": function (value, valueText, valueAxis) {
-                return valueText + ' mAh';
+          "axisY": {
+            "title": "Volts"
+          },
+          "axisY2": {
+            "title": "Capacity (mAh)",
+            "labelFormatter": function (e) {
+              return (e.value) + "mAh"
+            }
+          },
+          "toolTip": {
+            "contentFormatter": function (e) {
+              var entry = e.entries[0];
+              if (entry.dataSeries.axisYType === 'primary') {
+                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+              } else {
+                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
               }
+            }
+          },
+          "data": [
+            {
+              "showInLegend": true,
+              "name": "Voltage One",
+              "type": "line",
+              "dataPoints": []
             },
             {
-              "id": "voltageAxis",
-              "title": "Volts",
-              "position": "right",
-//              "labelFunction": function (value, valueText, valueAxis) {
-//                return (value / 100);
-//              }
-                  }
-              ],
-          "legend": {
-            "useGraphSettings": true
-          },
-          "titles": [
+              "showInLegend": true,
+              "name": "Voltage Two",
+              "type": "line",
+              "dataPoints": []
+            },
             {
-              "id": "Title-1",
-              "size": 15,
-              "text": "PowerBox"
-                  }
-              ],
-          "dataProvider": []
+              "showInLegend": true,
+              "name": "Capacity One",
+              "type": "line",
+              "axisYType": "secondary",
+              "dataPoints": []
+            },
+            {
+              "showInLegend": true,
+              "name": "Capacity Two",
+              "type": "line",
+              "axisYType": "secondary",
+              "dataPoints": []
+            }
+          ]
         },
         "rx": {
-          "type": "serial",
-          "categoryField": "timestamp",
-          "startDuration": 1,
-          "theme": "light",
-          "categoryAxis": {
-            "gridPosition": "start",
-            "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return _timeTickFormatter(value);
-            }
+          "animationEnabled": true,
+          "title": {
+            "text": "RX"
           },
-          "trendLines": [],
-          "graphs": [
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-a",
-              "title": "A",
-              "valueAxis": "signalAxis",
-              "valueField": "a"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-b",
-              "title": "B",
-              "valueAxis": "signalAxis",
-              "valueField": "b"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-l",
-              "title": "L",
-              "valueAxis": "signalAxis",
-              "valueField": "l"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-r",
-              "title": "R",
-              "valueAxis": "signalAxis",
-              "valueField": "r"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-frameLoss",
-              "title": "Frame Loss",
-              "valueAxis": "frameAndHoldsAxis",
-              "valueField": "frameLoss"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-holds",
-              "title": "Holds",
-              "valueAxis": "frameAndHoldsAxis",
-              "valueField": "holds"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rx-holds",
-              "title": "RX Voltage",
-              "valueAxis": "voltageAxis",
-              "valueField": "volts"
-            }
-          ],
-          "valueAxes": [
-            {
-              "id": "rxVoltsAxis",
-              "title": "Volts",
-              //                      "labelFunction": function (value, valueText, valueAxis) {
-              //                          if (valueAxis.id == 'altitudeAxis') {
-              //                              return (value / 10) + 'm';
-              //                          } else {
-              //                              return valueText;
-              //                          }
-              //                      }
-                  },
-            {
-              "id": "signalAxis",
-              "title": "S Count",
-              "position": "right"
-            },
-            {
-              "id": "frameAndHoldsAxis",
-              "title": "Count"
-            }
-          ],
           "legend": {
-            "useGraphSettings": true
+            "horizontalAlign": "center", // "center" , "right"
+            "verticalAlign": "bottom", // "top" , "bottom"
+//            "fontSize": 15
           },
-          "titles": [
+          "axisX": {
+            "title": "Time",
+            "labelFormatter": function (e) {
+              return _timeTickFormatter(e.value);
+            }
+          },
+          "axisY": {
+            "title": "Volts"
+          },
+          "axisY2": {
+            "title": "Capacity (mAh)",
+            "labelFormatter": function (e) {
+              return (e.value) + "mAh"
+            }
+          },
+          "toolTip": {
+            "contentFormatter": function (e) {
+              var entry = e.entries[0];
+              if (entry.dataSeries.axisYType === 'primary') {
+                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+              } else {
+                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+              }
+            }
+          },
+          "data": [
             {
-              "id": "Title-1",
-              "size": 15,
-              "text": "RX"
-                  }
-              ],
-          "dataProvider": []
+              "showInLegend": true,
+              "name": "A",
+              "type": "line",
+              "dataPoints": []
+            },
+            {
+              "showInLegend": true,
+              "name": "B",
+              "type": "line",
+              "dataPoints": []
+            },
+            {
+              "showInLegend": true,
+              "name": "L",
+              "type": "line",
+              "dataPoints": []
+            },
+            {
+              "showInLegend": true,
+              "name": "R",
+              "type": "line",
+              "dataPoints": []
+            }
+            ,
+            {
+              "showInLegend": true,
+              "name": "Frame Loss",
+              "type": "line",
+              "dataPoints": []
+            }
+            ,
+            {
+              "showInLegend": true,
+              "name": "Holds",
+              "type": "line",
+              "dataPoints": []
+            }
+            ,
+            {
+              "showInLegend": true,
+              "name": "RX Voltage",
+              "type": "line",
+              "dataPoints": []
+            }
+          ]
         },
         "standard": {
           "type": "serial",
