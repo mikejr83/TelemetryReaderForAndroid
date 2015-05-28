@@ -239,87 +239,60 @@ angular.module('telemetryReaderForAndroid.services')
           ]
         },
         "standard": {
-          "type": "serial",
-          "categoryField": "timestamp",
-          "startDuration": 1,
-          "startEffect": "easeOutSine",
-          "theme": "light",
-          "categoryAxis": {
-            "gridPosition": "start",
-            "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return _timeTickFormatter(value);
-            }
+          "animationEnabled": true,
+          "title": {
+            "text": "RX"
           },
-          "trendLines": [],
-          "graphs": [
-            {
-              "balloonText": "[[value]]",
-              "id": "am-rpm",
-              "title": "RPM",
-              "valueAxis": "rpmAxis",
-              "valueField": "rpm"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-temperature",
-              "title": "Temperature",
-              "valueAxis": "temperatureAxis",
-              "valueField": "temperature"
-            },
-            {
-              "balloonText": "[[value]]",
-              "id": "am-voltage",
-              "title": "RX Voltage",
-              "valueAxis": "voltageAxis",
-              "valueField": "volt"
-            }
-          ],
           "legend": {
-            "useGraphSettings": true
+            "horizontalAlign": "center", // "center" , "right"
+            "verticalAlign": "bottom", // "top" , "bottom"
+//            "fontSize": 15
           },
-          "valueAxes": [
+          "axisX": {
+            "title": "Time",
+            "labelFormatter": function (e) {
+              return _timeTickFormatter(e.value);
+            }
+          },
+          "axisY": {
+            "title": "Volts"
+          },
+//          "axisY2": {
+//            "title": "Capacity (mAh)",
+//            "labelFormatter": function (e) {
+//              return (e.value) + "mAh"
+//            }
+//          },
+//          "toolTip": {
+//            "contentFormatter": function (e) {
+//              var entry = e.entries[0];
+//              if (entry.dataSeries.axisYType === 'primary') {
+//                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+//              } else {
+//                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+//              }
+//            }
+//          },
+          "data": [
             {
-              "id": "rpmAxis",
-              "title": "RPM",
-              //                      "labelFunction": function (value, valueText, valueAxis) {
-              //                          if (valueAxis.id == 'altitudeAxis') {
-              //                              return (value / 10) + 'm';
-              //                          } else {
-              //                              return valueText;
-              //                          }
-              //                      }
-                  },
+              "showInLegend": true,
+              "name": "RPM",
+              "type": "line",
+              "dataPoints": []
+            },
             {
-              "id": "voltageAxis",
-              "title": "Volts",
-              //                      "labelFunction": function (value, valueText, valueAxis) {
-              //                          if (valueAxis.id == 'altitudeAxis') {
-              //                              return (value / 10) + 'm';
-              //                          } else {
-              //                              return valueText;
-              //                          }
-              //                      }
-                  },
+              "showInLegend": true,
+              "name": "Temperature",
+              "type": "line",
+              "dataPoints": []
+            },
             {
-              "id": "temperatureAxis",
-              "title": "Temperature",
-              //                      "labelFunction": function (value, valueText, valueAxis) {
-              //                          if (valueAxis.id == 'altitudeAxis') {
-              //                              return (value / 10) + 'm';
-              //                          } else {
-              //                              return valueText;
-              //                          }
-              //                      }
-                  }
-          ],
-          "titles": [
-            {
-              "id": "Title-1",
-              "size": 15,
-              "text": "Standard"
-                  }
-              ],
-          "dataProvider": []
+              "showInLegend": true,
+              "name": "Voltage",
+              "type": "line",
+              "dataPoints": []
+            }
+          ]
         },
         "vario": {
           "type": "serial",

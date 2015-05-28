@@ -99,7 +99,18 @@ angular.module('telemetryReaderForAndroid.services', [])
             });
           },
           "standard": function (chartOptions, block) {
-
+            chartOptions.data[0].dataPoints.push({
+              x: block.timestamp,
+              y: block.rpm
+            });
+            chartOptions.data[1].dataPoints.push({
+              x: block.timestamp,
+              y: block.temperature
+            });
+            chartOptions.data[2].dataPoints.push({
+              x: block.timestamp,
+              y: block.volt
+            });
           }
         }
 
