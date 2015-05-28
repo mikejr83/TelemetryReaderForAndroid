@@ -15,32 +15,29 @@
 
     <script src="lib/jQuery/jquery-2.1.4.min.js"></script>
     <script src="lib/moment/moment.min.js"></script>
-    <script src="lib/d3/d3.min.js"></script>
-    <script src="lib/xcharts/xcharts.min.js"></script>
+    <script src="lib/lodash/lodash.min.js"></script>
+    <script src="lib/canvasjs/jquery.canvasjs.min.js"></script>
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
-
-    <script src="lib/d3/d3.min.js"></script>
-    <script src="lib/xcharts/xcharts.min.js"></script>
     
     <!-- your app's js -->
     <script src="js/app.js"></script>
     <script src="js/services.js"></script>
     <script src="js/controllers.js"></script>
     <script type="text/javascript">
-      var $HandleResize = function () {
-        var gridContainer = $('ion-content');
-        console.log('resized');
-        var figure = $('.grid-container figure');
-        figure.height(gridContainer.height() - 30);
-        figure.width(gridContainer.width() - 30);
-      }
-
-      $(window).resize($HandleResize);
-      $(document).ready($HandleResize);
+//      var $HandleResize = function () {
+//        var gridContainer = $('ion-content');
+//        console.log('resized');
+//        var figure = $('.grid-container figure');
+//        figure.height(gridContainer.height() - 30);
+//        figure.width(gridContainer.width() - 30);
+//      }
+//
+//      $(window).resize($HandleResize);
+//      $(document).ready($HandleResize);
     </script>
   </head>
 
