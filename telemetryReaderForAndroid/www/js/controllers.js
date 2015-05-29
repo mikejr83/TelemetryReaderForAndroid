@@ -109,13 +109,13 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         }
 
         console.log('canvasJSChartOptions - done', canvasJSChartOptions);
-        if (!$scope.chart) {
-          $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
-        } else {
-          $scope.chart.options = canvasJSChartOptions;
-        }
-        //
-        $scope.chart.render();
+//        if (!$scope.chart) {
+//          $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
+//        } else {
+//          $scope.chart.options = canvasJSChartOptions;
+//        }
+//        //
+//        $scope.chart.render();
 
         $ionicLoading.hide();
       };

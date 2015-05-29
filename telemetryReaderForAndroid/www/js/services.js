@@ -69,31 +69,31 @@ angular.module('telemetryReaderForAndroid.services', [])
             });
           },
           "rx": function (chartOptions, block) {
-            chartOptions.data[0].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.a
             });
-            chartOptions.data[1].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[1].dataPoints.push({
               x: block.timestamp,
               y: block.b
             });
-            chartOptions.data[2].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[2].dataPoints.push({
               x: block.timestamp,
               y: block.l
             });
-            chartOptions.data[3].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[3].dataPoints.push({
               x: block.timestamp,
               y: block.r
             });
-//            chartOptions.data[4].dataPoints.push({
-//              x: block.timestamp,
-//              y: block.frameLoss
-//            });
-//            chartOptions.data[5].dataPoints.push({
-//              x: block.timestamp,
-//              y: block.holds
-//            });
-            chartOptions.data[4].dataPoints.push({
+            chartOptions.chartSeriesTypes[1].data[0].dataPoints.push({
+              x: block.timestamp,
+              y: block.frameLoss
+            });
+            chartOptions.chartSeriesTypes[1].data[1].dataPoints.push({
+              x: block.timestamp,
+              y: block.holds
+            });
+            chartOptions.chartSeriesTypes[2].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.volts
             });

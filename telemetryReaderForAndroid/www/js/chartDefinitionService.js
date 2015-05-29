@@ -282,6 +282,9 @@ angular.module('telemetryReaderForAndroid.services')
               ]
             },
             {
+              "axis": {
+                "title": "Fades and Holds"
+              },
               "data": [
                 {
                   "showInLegend": true,
