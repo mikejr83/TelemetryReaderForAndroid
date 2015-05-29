@@ -1,22 +1,24 @@
 angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndroid.services'])
-  .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', 'dataService', function ($scope, $ionicModal, $timeout, dataService) {
-    $scope.doGetDataFile = function () {
-      console.log('get data file');
+  .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', '$window', 'dataService',
+                          function ($scope, $ionicModal, $timeout, $window, dataService) {
+      $scope.doGetDataFile = function () {
+        console.log('get data file');
 
         dataService.loadData().then(function (data) {
-        if (dataService.flgiths && dataService.flights.length > 0) {
-          dataService.selectedFlight = dataService.flights[0];
-        } else {
-          dataService.selectedFlight = null;
-        }
+          if (dataService.flgiths && dataService.flights.length > 0) {
+            dataService.selectedFlight = dataService.flights[0];
+          } else {
+            dataService.selectedFlight = null;
+          }
 
-      });
-    };
+        });
+      };
 
-    $scope.setTelemetryType = function (key, title) {
-      dataService.selectedKey = key;
-      dataService.selectedTitle = title;
-    }
+      $scope.setTelemetryType = function (key, title) {
+        dataService.selectedKey = key;
+        dataService.selectedTitle = title;
+        $window.title = title;
+      }
 }])
   .controller('TelemetryViewerController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'dataService',
                                      function ($scope, $window, $ionicLoading, $ionicScrollDelegate, dataService) {
@@ -60,13 +62,57 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         //        $scope.chartData.xMin = $scope.chartData.main[0].data[0].x;
         //        $scope.chartData.xMax = $scope.chartData.main[0].data[$scope.chartData.main[0].data.length - 1].x;
         console.log('selectedKey', $scope.service.selectedKey);
-        console.log('chartOptions', $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
-        if (!$scope.chart) {
-          $scope.chart = new CanvasJS.Chart("myChart", $scope.service.selectedFlight.flightData[$scope.service.selectedKey]);
-        } else {
-          $scope.chart.options = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
+        var chartDataOptions = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
+        console.log('chartOptions', chartDataOptions);
+        if (!chartDataOptions) {
+          return;
         }
 
+        var canvasJSChartOptions = _.cloneDeep(chartDataOptions.basic);
+
+        if (chartDataOptions.chartSeriesTypes.length < 3) {
+          canvasJSChartOptions['axisY'] = chartDataOptions.chartSeriesTypes[0].axis;
+          canvasJSChartOptions['toolTip'] = chartDataOptions.chartSeriesTypes[0].tooltip;
+          canvasJSChartOptions['data'] = chartDataOptions.chartSeriesTypes[0].data;
+
+          console.log('canvasJSChartOptions - 0', canvasJSChartOptions);
+
+          if (chartDataOptions.chartSeriesTypes.length == 2) {
+            canvasJSChartOptions['axisY2'] = chartDataOptions.chartSeriesTypes[1].axis;
+            if (canvasJSChartOptions['toolTip'] &&
+              chartDataOptions.chartSeriesTypes[1].tooltip &&
+              chartDataOptions.chartSeriesTypes[1].tooltip.contentFormatter) {
+              canvasJSChartOptions['toolTip'] = {
+                "contentFormatter": function (e) {
+                  if (e.entries[0].dataSeries.axisYType === 'secondary') {
+                    return chartDataOptions.chartSeriesTypes[1].tooltip.contentFormatter(e);
+                  } else {
+                    return chartDataOptions.chartSeriesTypes[0].tooltip.contentFormatter(e);
+                  }
+                }
+              }
+            } else if (!canvasJSChartOptions['toolTip'] &&
+              chartDataOptions.chartSeriesTypes[1].tooltip &&
+              chartDataOptions.chartSeriesTypes[1].tooltip.contentFormatter) {
+              canvasJSChartOptions['toolTip'] = chartDataOptions.chartSeriesTypes[1].tooltip;
+            }
+            _.forEach(chartDataOptions.chartSeriesTypes[1].data, function (dataSet) {
+              console.log('data set series 2', dataSet);
+              dataSet['axisYType'] = 'secondary';
+              canvasJSChartOptions['data'].push(dataSet);
+            });
+          }
+        } else {
+
+        }
+
+        console.log('canvasJSChartOptions - done', canvasJSChartOptions);
+        if (!$scope.chart) {
+          $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
+        } else {
+          $scope.chart.options = canvasJSChartOptions;
+        }
+        //
         $scope.chart.render();
 
         $ionicLoading.hide();

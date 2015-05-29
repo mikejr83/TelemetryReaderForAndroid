@@ -2,7 +2,7 @@ angular.module('telemetryReaderForAndroid.services', [])
   .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
     this.flights = null;
     this.selectedFlight = null;
-    this.selectedKey = 'altitude';
+    this.selectedKey = 'powerbox';
     this.selectedTitle = 'Altitude';
     this.chart = null;
 
@@ -51,19 +51,19 @@ angular.module('telemetryReaderForAndroid.services', [])
 
           },
           "powerbox": function (chartOptions, block) {
-            chartOptions.data[0].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.voltageOne
             });
-            chartOptions.data[1].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[1].dataPoints.push({
               x: block.timestamp,
               y: block.voltageTwo
             });
-            chartOptions.data[2].dataPoints.push({
+            chartOptions.chartSeriesTypes[1].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.capacityOne
             });
-            chartOptions.data[3].dataPoints.push({
+            chartOptions.chartSeriesTypes[1].data[1].dataPoints.push({
               x: block.timestamp,
               y: block.capacityTwo
             });
@@ -85,15 +85,15 @@ angular.module('telemetryReaderForAndroid.services', [])
               x: block.timestamp,
               y: block.r
             });
+//            chartOptions.data[4].dataPoints.push({
+//              x: block.timestamp,
+//              y: block.frameLoss
+//            });
+//            chartOptions.data[5].dataPoints.push({
+//              x: block.timestamp,
+//              y: block.holds
+//            });
             chartOptions.data[4].dataPoints.push({
-              x: block.timestamp,
-              y: block.frameLoss
-            });
-            chartOptions.data[5].dataPoints.push({
-              x: block.timestamp,
-              y: block.holds
-            });
-            chartOptions.data[6].dataPoints.push({
               x: block.timestamp,
               y: block.volts
             });

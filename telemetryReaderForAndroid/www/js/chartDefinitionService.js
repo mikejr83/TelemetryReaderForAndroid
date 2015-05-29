@@ -76,30 +76,14 @@ angular.module('telemetryReaderForAndroid.services')
           ]
         },
         "gforce": {
-          "type": "serial",
-          "categoryField": "timestamp",
-          "startDuration": 1,
-          "startEffect": "easeOutSine",
-          "theme": "light",
-          "categoryAxis": {
-            "gridPosition": "start",
-            "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return _timeTickFormatter(value);
-            }
-          },
-          "trendLines": [],
-          "graphs": [],
-          "dataProvider": []
-        },
-        "powerbox": {
           "animationEnabled": true,
           "title": {
-            "text": "PowerBox"
+            "text": "G-Force"
           },
           "legend": {
             "horizontalAlign": "center", // "center" , "right"
             "verticalAlign": "bottom", // "top" , "bottom"
-//            "fontSize": 15
+            //            "fontSize": 15
           },
           "axisX": {
             "title": "Time",
@@ -155,6 +139,79 @@ angular.module('telemetryReaderForAndroid.services')
             }
           ]
         },
+        "powerbox": {
+          "basic": {
+            "animationEnabled": true,
+            "title": {
+              "text": "PowerBox"
+            },
+            "legend": {
+              "horizontalAlign": "center", // "center" , "right"
+              "verticalAlign": "bottom", // "top" , "bottom"
+              //            "fontSize": 15
+            },
+            "axisX": {
+              "title": "Time",
+              "labelFormatter": function (e) {
+                return _timeTickFormatter(e.value);
+              }
+            }
+          },
+          chartSeriesTypes: [
+            {
+              "axis": {
+                "title": "Volts"
+              },
+              "tooltip": {
+                "contentFormatter": function (e) {
+                  var entry = e.entries[0];
+                  return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+                }
+              },
+              "data": [{
+                  "showInLegend": true,
+                  "name": "Voltage One",
+                  "type": "line",
+                  "dataPoints": []
+            },
+                {
+                  "showInLegend": true,
+                  "name": "Voltage Two",
+                  "type": "line",
+                  "dataPoints": []
+            }
+                       ]
+        },
+            {
+              "axis": {
+                "title": "Capacity (mAh)",
+                "labelFormatter": function (e) {
+                  return (e.value) + "mAh"
+                }
+              },
+              "tooltip": {
+                "contentFormatter": function (e) {
+                  var entry = e.entries[0];
+                  return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+                }
+              },
+              "data": [
+                {
+                  "showInLegend": true,
+                  "name": "Capacity One",
+                  "type": "line",
+                  "dataPoints": []
+            },
+                {
+                  "showInLegend": true,
+                  "name": "Capacity Two",
+                  "type": "line",
+                  "dataPoints": []
+            }
+              ]
+            }
+          ]
+        },
         "rx": {
           "animationEnabled": true,
           "title": {
@@ -163,7 +220,7 @@ angular.module('telemetryReaderForAndroid.services')
           "legend": {
             "horizontalAlign": "center", // "center" , "right"
             "verticalAlign": "bottom", // "top" , "bottom"
-//            "fontSize": 15
+            //            "fontSize": 15
           },
           "axisX": {
             "title": "Time",
@@ -175,10 +232,7 @@ angular.module('telemetryReaderForAndroid.services')
             "title": "Volts"
           },
           "axisY2": {
-            "title": "Capacity (mAh)",
-            "labelFormatter": function (e) {
-              return (e.value) + "mAh"
-            }
+            "title": "Signal"
           },
           "toolTip": {
             "contentFormatter": function (e) {
@@ -194,31 +248,76 @@ angular.module('telemetryReaderForAndroid.services')
             {
               "showInLegend": true,
               "name": "A",
+              "axisYType": "secondary",
               "type": "line",
               "dataPoints": []
             },
             {
               "showInLegend": true,
               "name": "B",
+              "axisYType": "secondary",
               "type": "line",
               "dataPoints": []
             },
             {
               "showInLegend": true,
               "name": "L",
+              "axisYType": "secondary",
               "type": "line",
               "dataPoints": []
             },
             {
               "showInLegend": true,
               "name": "R",
+              "axisYType": "secondary",
+              "type": "line",
+              "dataPoints": []
+            },
+            {
+              "showInLegend": true,
+              "name": "RX Voltage",
               "type": "line",
               "dataPoints": []
             }
-            ,
+          ]
+        },
+        "rx - 2": {
+          "animationEnabled": true,
+          "title": {
+            "text": "RX"
+          },
+          "legend": {
+            "horizontalAlign": "center", // "center" , "right"
+            "verticalAlign": "bottom", // "top" , "bottom"
+            //            "fontSize": 15
+          },
+          "axisX": {
+            "title": "Time",
+            "labelFormatter": function (e) {
+              return _timeTickFormatter(e.value);
+            }
+          },
+          "axisY": {
+            "title": "Volts"
+          },
+          "axisY2": {
+            "title": "Signal"
+          },
+          "toolTip": {
+            "contentFormatter": function (e) {
+              var entry = e.entries[0];
+              if (entry.dataSeries.axisYType === 'primary') {
+                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+              } else {
+                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+              }
+            }
+          },
+          "data": [
             {
               "showInLegend": true,
               "name": "Frame Loss",
+              "axisYType": "secondary",
               "type": "line",
               "dataPoints": []
             }
@@ -226,6 +325,7 @@ angular.module('telemetryReaderForAndroid.services')
             {
               "showInLegend": true,
               "name": "Holds",
+              "axisYType": "secondary",
               "type": "line",
               "dataPoints": []
             }
@@ -246,7 +346,7 @@ angular.module('telemetryReaderForAndroid.services')
           "legend": {
             "horizontalAlign": "center", // "center" , "right"
             "verticalAlign": "bottom", // "top" , "bottom"
-//            "fontSize": 15
+            //            "fontSize": 15
           },
           "axisX": {
             "title": "Time",
@@ -257,22 +357,22 @@ angular.module('telemetryReaderForAndroid.services')
           "axisY": {
             "title": "Volts"
           },
-//          "axisY2": {
-//            "title": "Capacity (mAh)",
-//            "labelFormatter": function (e) {
-//              return (e.value) + "mAh"
-//            }
-//          },
-//          "toolTip": {
-//            "contentFormatter": function (e) {
-//              var entry = e.entries[0];
-//              if (entry.dataSeries.axisYType === 'primary') {
-//                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-//              } else {
-//                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-//              }
-//            }
-//          },
+          //          "axisY2": {
+          //            "title": "Capacity (mAh)",
+          //            "labelFormatter": function (e) {
+          //              return (e.value) + "mAh"
+          //            }
+          //          },
+          //          "toolTip": {
+          //            "contentFormatter": function (e) {
+          //              var entry = e.entries[0];
+          //              if (entry.dataSeries.axisYType === 'primary') {
+          //                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+          //              } else {
+          //                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+          //              }
+          //            }
+          //          },
           "data": [
             {
               "showInLegend": true,
