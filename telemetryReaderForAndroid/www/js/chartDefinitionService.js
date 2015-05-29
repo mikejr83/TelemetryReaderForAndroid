@@ -15,63 +15,76 @@ angular.module('telemetryReaderForAndroid.services')
 
       return {
         "altitude": {
-          "animationEnabled": true,
-          "title": {
-            "text": "Altitude"
-          },
-          "axisX": {
-            "title": "Time",
-            "labelFormatter": function (e) {
-              return _timeTickFormatter(e.value);
+          "basic": {
+            "animationEnabled": true,
+            "title": {
+              "text": "Altitude"
+            },
+            "axisX": {
+              "title": "Time",
+              "labelFormatter": function (e) {
+                return _timeTickFormatter(e.value);
+              }
+            },
+            "axisY": {
+              "title": "Altitude (meters)",
+              "labelFormatter": function (e) {
+                return (e.value / 10) + "m"
+              }
+            },
+            "toolTip": {
+              "contentFormatter": function (e) {
+                var dataPoint = e.entries[0].dataPoint;
+                return (dataPoint.y / 10) + 'm (' + _timeTickFormatter(dataPoint.x) + ')';
+              }
             }
           },
-          "axisY": {
-            "title": "Altitude (meters)",
-            "labelFormatter": function (e) {
-              return (e.value / 10) + "m"
-            }
-          },
-          "toolTip": {
-            "contentFormatter": function (e) {
-              var dataPoint = e.entries[0].dataPoint;
-              return (dataPoint.y / 10) + 'm (' + _timeTickFormatter(dataPoint.x) + ')';
-            }
-          },
-          "data": [
+          "chartSeriesTypes": [
             {
-              "type": "line",
-              "dataPoints": []
+              "data": [
+                {
+                  "name": "Altitude",
+                  "type": "line",
+                  "dataPoints": []
+                }
+              ]
             }
           ]
         },
         "current": {
-          "animationEnabled": true,
-          "title": {
-            "text": "Current"
-          },
-          "axisX": {
-            "title": "Time",
-            "labelFormatter": function (e) {
-              return _timeTickFormatter(e.value);
+          "basic": {
+            "animationEnabled": true,
+            "title": {
+              "text": "Current"
+            },
+            "axisX": {
+              "title": "Time",
+              "labelFormatter": function (e) {
+                return _timeTickFormatter(e.value);
+              }
+            },
+            "axisY": {
+              "title": "Current (mA)",
+              "labelFormatter": function (e) {
+                return (e.value / 10) + 'A'
+              }
+            },
+            "toolTip": {
+              "contentFormatter": function (e) {
+                var dataPoint = e.entries[0].dataPoint;
+                return (dataPoint.y / 10) + 'A (' + _timeTickFormatter(dataPoint.x) + ')';
+              }
             }
           },
-          "axisY": {
-            "title": "Current (mA)",
-            "labelFormatter": function (e) {
-              return (e.value / 10) + 'A'
-            }
-          },
-          "toolTip": {
-            "contentFormatter": function (e) {
-              var dataPoint = e.entries[0].dataPoint;
-              return (dataPoint.y / 10) + 'A (' + _timeTickFormatter(dataPoint.x) + ')';
-            }
-          },
-          "data": [
+          "chartSeriesTypes": [
             {
-              "name": "Current",
-              "type": "line",
-              "dataPoints": []
+              "data": [
+                {
+                  "name": "Current",
+                  "type": "line",
+                  "dataPoints": []
+                }
+              ]
             }
           ]
         },
@@ -168,20 +181,21 @@ angular.module('telemetryReaderForAndroid.services')
                   return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
                 }
               },
-              "data": [{
+              "data": [
+                {
                   "showInLegend": true,
                   "name": "Voltage One",
                   "type": "line",
                   "dataPoints": []
-            },
+                },
                 {
                   "showInLegend": true,
                   "name": "Voltage Two",
                   "type": "line",
                   "dataPoints": []
-            }
-                       ]
-        },
+                }
+              ]
+            },
             {
               "axis": {
                 "title": "Capacity (mAh)",
@@ -201,140 +215,108 @@ angular.module('telemetryReaderForAndroid.services')
                   "name": "Capacity One",
                   "type": "line",
                   "dataPoints": []
-            },
+                },
                 {
                   "showInLegend": true,
                   "name": "Capacity Two",
                   "type": "line",
                   "dataPoints": []
-            }
+                }
               ]
             }
           ]
         },
         "rx": {
-          "animationEnabled": true,
-          "title": {
-            "text": "RX"
-          },
-          "legend": {
-            "horizontalAlign": "center", // "center" , "right"
-            "verticalAlign": "bottom", // "top" , "bottom"
-            //            "fontSize": 15
-          },
-          "axisX": {
-            "title": "Time",
-            "labelFormatter": function (e) {
-              return _timeTickFormatter(e.value);
-            }
-          },
-          "axisY": {
-            "title": "Volts"
-          },
-          "axisY2": {
-            "title": "Signal"
-          },
-          "toolTip": {
-            "contentFormatter": function (e) {
-              var entry = e.entries[0];
-              if (entry.dataSeries.axisYType === 'primary') {
-                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-              } else {
-                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+          "basic": {
+            "animationEnabled": true,
+            "title": {
+              "text": "RX"
+            },
+            "legend": {
+              "horizontalAlign": "center", // "center" , "right"
+              "verticalAlign": "bottom", // "top" , "bottom"
+              //            "fontSize": 15
+            },
+            "axisX": {
+              "title": "Time",
+              "labelFormatter": function (e) {
+                return _timeTickFormatter(e.value);
               }
             }
           },
-          "data": [
+          chartSeriesTypes: [
             {
-              "showInLegend": true,
-              "name": "A",
-              "axisYType": "secondary",
-              "type": "line",
-              "dataPoints": []
+              "axis": {
+                "title": "Signal"
+              },
+              "tooltip": {
+                "contentFormatter": function (e) {
+                  return entry.dataPoint.y
+                }
+              },
+              "data": [
+                {
+                  "showInLegend": true,
+                  "name": "A",
+                  "type": "line",
+                  "dataPoints": []
+                },
+                {
+                  "showInLegend": true,
+                  "name": "B",
+                  "type": "line",
+                  "dataPoints": []
+                },
+                {
+                  "showInLegend": true,
+                  "name": "L",
+                  "type": "line",
+                  "dataPoints": []
+                },
+                {
+                  "showInLegend": true,
+                  "name": "R",
+                  "type": "line",
+                  "dataPoints": []
+                }
+              ]
             },
             {
-              "showInLegend": true,
-              "name": "B",
-              "axisYType": "secondary",
-              "type": "line",
-              "dataPoints": []
+              "data": [
+                {
+                  "showInLegend": true,
+                  "name": "Frame Loss",
+                  "axisYType": "secondary",
+                  "type": "line",
+                  "dataPoints": []
+                },
+                {
+                  "showInLegend": true,
+                  "name": "Holds",
+                  "axisYType": "secondary",
+                  "type": "line",
+                  "dataPoints": []
+                }
+              ]
             },
             {
-              "showInLegend": true,
-              "name": "L",
-              "axisYType": "secondary",
-              "type": "line",
-              "dataPoints": []
-            },
-            {
-              "showInLegend": true,
-              "name": "R",
-              "axisYType": "secondary",
-              "type": "line",
-              "dataPoints": []
-            },
-            {
-              "showInLegend": true,
-              "name": "RX Voltage",
-              "type": "line",
-              "dataPoints": []
-            }
-          ]
-        },
-        "rx - 2": {
-          "animationEnabled": true,
-          "title": {
-            "text": "RX"
-          },
-          "legend": {
-            "horizontalAlign": "center", // "center" , "right"
-            "verticalAlign": "bottom", // "top" , "bottom"
-            //            "fontSize": 15
-          },
-          "axisX": {
-            "title": "Time",
-            "labelFormatter": function (e) {
-              return _timeTickFormatter(e.value);
-            }
-          },
-          "axisY": {
-            "title": "Volts"
-          },
-          "axisY2": {
-            "title": "Signal"
-          },
-          "toolTip": {
-            "contentFormatter": function (e) {
-              var entry = e.entries[0];
-              if (entry.dataSeries.axisYType === 'primary') {
-                return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-              } else {
-                return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-              }
-            }
-          },
-          "data": [
-            {
-              "showInLegend": true,
-              "name": "Frame Loss",
-              "axisYType": "secondary",
-              "type": "line",
-              "dataPoints": []
-            }
-            ,
-            {
-              "showInLegend": true,
-              "name": "Holds",
-              "axisYType": "secondary",
-              "type": "line",
-              "dataPoints": []
-            }
-            ,
-            {
-              "showInLegend": true,
-              "name": "RX Voltage",
-              "type": "line",
-              "dataPoints": []
+              "axis": {
+                "title": "Volts"
+              },
+              "toolTip": {
+                "contentFormatter": function (e) {
+                  var entry = e.entries[0];
+                  return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
+                }
+              },
+              "data": [
+                {
+                  "showInLegend": true,
+                  "name": "RX Voltage",
+                  "type": "line",
+                  "dataPoints": []
+                }
+              ]
             }
           ]
         },

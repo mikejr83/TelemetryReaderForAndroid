@@ -59,8 +59,6 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           return;
         }
 
-        //        $scope.chartData.xMin = $scope.chartData.main[0].data[0].x;
-        //        $scope.chartData.xMax = $scope.chartData.main[0].data[$scope.chartData.main[0].data.length - 1].x;
         console.log('selectedKey', $scope.service.selectedKey);
         var chartDataOptions = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
         console.log('chartOptions', chartDataOptions);
@@ -71,8 +69,12 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         var canvasJSChartOptions = _.cloneDeep(chartDataOptions.basic);
 
         if (chartDataOptions.chartSeriesTypes.length < 3) {
-          canvasJSChartOptions['axisY'] = chartDataOptions.chartSeriesTypes[0].axis;
-          canvasJSChartOptions['toolTip'] = chartDataOptions.chartSeriesTypes[0].tooltip;
+          if (chartDataOptions.chartSeriesTypes[0].axis) {
+            canvasJSChartOptions['axisY'] = chartDataOptions.chartSeriesTypes[0].axis;
+          }
+          if (chartDataOptions.chartSeriesTypes[0].tooltip) {
+            canvasJSChartOptions['toolTip'] = chartDataOptions.chartSeriesTypes[0].tooltip;
+          }
           canvasJSChartOptions['data'] = chartDataOptions.chartSeriesTypes[0].data;
 
           console.log('canvasJSChartOptions - 0', canvasJSChartOptions);

@@ -2,7 +2,7 @@ angular.module('telemetryReaderForAndroid.services', [])
   .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
     this.flights = null;
     this.selectedFlight = null;
-    this.selectedKey = 'powerbox';
+    this.selectedKey = 'altitude';
     this.selectedTitle = 'Altitude';
     this.chart = null;
 
@@ -36,13 +36,13 @@ angular.module('telemetryReaderForAndroid.services', [])
 
         var converter = {
           "altitude": function (chartOptions, block) {
-            chartOptions.data[0].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.altitude
             });
           },
           "current": function (chartOptions, block) {
-            chartOptions.data[0].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.current
             });
