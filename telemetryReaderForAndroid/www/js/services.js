@@ -1,4 +1,5 @@
 angular.module('telemetryReaderForAndroid.services', [])
+
   .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
     this.flights = null;
     this.selectedFlight = null;
@@ -99,15 +100,15 @@ angular.module('telemetryReaderForAndroid.services', [])
             });
           },
           "standard": function (chartOptions, block) {
-            chartOptions.data[0].dataPoints.push({
+            chartOptions.chartSeriesTypes[0].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.rpm
             });
-            chartOptions.data[1].dataPoints.push({
+            chartOptions.chartSeriesTypes[1].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.temperature
             });
-            chartOptions.data[2].dataPoints.push({
+            chartOptions.chartSeriesTypes[2].data[0].dataPoints.push({
               x: block.timestamp,
               y: block.volt
             });

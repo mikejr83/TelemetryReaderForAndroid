@@ -1,8 +1,16 @@
 <ion-view view-title="{{service.selectedTitle}}">
+  
   <ion-content>
       <select ng-model="service.selectedFlight" ng-options="flight as flight.name for flight in service.flights" ng-change="selectedFlightChanged()"></select>
-    <div ng-show="service.selectedFlight.flightData[service.selectedKey].chartSeriesTypes.length > 2">
-      <span ng-repeat="series in service.selectedFlight.flightData[service.selectedKey].chartSeriesTypes">{{series.axis.title}}</span>
+    
+    <div ng-show="chartDataOptions.chartSeriesTypes.length > 2">
+      <label ng-repeat="series in chartDataOptions.chartSeriesTypes">
+        <input type="checkbox"
+               value="{{series.axis.title}}"
+               ng-model="series.selected"
+               ng-click="seriesClicked(series)"> {{series.axis.title}}
+      </label>
+      <!--<span ng-repeat="series in chartDataOptions.chartSeriesTypes">{{series.axis.title}}</span>-->
     </div>
       
     <div class="grid-container">

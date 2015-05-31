@@ -1,10 +1,11 @@
 angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndroid.services'])
+
   .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', '$window', 'dataService',
                           function ($scope, $ionicModal, $timeout, $window, dataService) {
       $scope.doGetDataFile = function () {
         console.log('get data file');
 
-        dataService.loadData().then(function (data) {
+        dataService.loadData(true).then(function (data) {
           if (dataService.flgiths && dataService.flights.length > 0) {
             dataService.selectedFlight = dataService.flights[0];
           } else {
@@ -20,15 +21,12 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         $window.title = title;
       }
 }])
-  .controller('TelemetryViewerController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'dataService',
-                                     function ($scope, $window, $ionicLoading, $ionicScrollDelegate, dataService) {
+  .controller('TelemetryViewerController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService',
+                                     function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
       $scope.chart = null;
       $scope.chartData = null;
       $scope.service = dataService;
-
-      $scope.$on('$ionicView.afterEnter', function () {
-
-      });
+      $scope.chartDataOptions = null;
 
       $scope.$on('$ionicView.enter', function () {
         if (!$scope.service.selectedKey)
@@ -46,9 +44,51 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           });
         } else {
           $scope.chart = null;
+
           $scope.selectedFlightChanged();
         }
       });
+
+      var doSetupChart = function (canvasJSChartOptions, chartSeriesTypes) {
+        if (chartSeriesTypes[0].axis) {
+          canvasJSChartOptions['axisY'] = chartSeriesTypes[0].axis;
+        }
+        if (chartSeriesTypes[0].tooltip) {
+          canvasJSChartOptions['toolTip'] = chartSeriesTypes[0].tooltip;
+        }
+        canvasJSChartOptions['data'] = chartSeriesTypes[0].data;
+        _.forEach(canvasJSChartOptions['data'], function (dataSet) {
+          dataSet['axisYType'] = 'primary';
+        })
+
+        console.log('canvasJSChartOptions - 0', canvasJSChartOptions);
+
+        if (chartSeriesTypes.length == 2) {
+          canvasJSChartOptions['axisY2'] = chartSeriesTypes[1].axis;
+          if (canvasJSChartOptions['toolTip'] &&
+            chartSeriesTypes[1].tooltip &&
+            chartSeriesTypes[1].tooltip.contentFormatter) {
+            canvasJSChartOptions['toolTip'] = {
+              "contentFormatter": function (e) {
+                if (e.entries[0].dataSeries.axisYType === 'secondary') {
+                  return chartSeriesTypes[1].tooltip.contentFormatter(e);
+                } else {
+                  return chartSeriesTypes[0].tooltip.contentFormatter(e);
+                }
+              }
+            }
+          } else if (!canvasJSChartOptions['toolTip'] &&
+            chartSeriesTypes[1].tooltip &&
+            chartSeriesTypes[1].tooltip.contentFormatter) {
+            canvasJSChartOptions['toolTip'] = chartSeriesTypes[1].tooltip;
+          }
+          _.forEach(chartSeriesTypes[1].data, function (dataSet) {
+            console.log('data set series 2', dataSet);
+            dataSet['axisYType'] = 'secondary';
+            canvasJSChartOptions['data'].push(dataSet);
+          });
+        }
+      }
 
       $scope.selectedFlightChanged = function () {
         $ionicLoading.show();
@@ -60,97 +100,46 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         }
 
         console.log('selectedKey', $scope.service.selectedKey);
-        var chartDataOptions = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
-        console.log('chartOptions', chartDataOptions);
-        if (!chartDataOptions) {
+        $scope.chartDataOptions = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
+        console.log('chartOptions', $scope.chartDataOptions);
+        if (!$scope.chartDataOptions) {
           return;
         }
 
-        var canvasJSChartOptions = _.cloneDeep(chartDataOptions.basic);
+        var canvasJSChartOptions = _.cloneDeep($scope.chartDataOptions.basic);
 
-        if (chartDataOptions.chartSeriesTypes.length < 3) {
-          if (chartDataOptions.chartSeriesTypes[0].axis) {
-            canvasJSChartOptions['axisY'] = chartDataOptions.chartSeriesTypes[0].axis;
-          }
-          if (chartDataOptions.chartSeriesTypes[0].tooltip) {
-            canvasJSChartOptions['toolTip'] = chartDataOptions.chartSeriesTypes[0].tooltip;
-          }
-          canvasJSChartOptions['data'] = chartDataOptions.chartSeriesTypes[0].data;
-
-          console.log('canvasJSChartOptions - 0', canvasJSChartOptions);
-
-          if (chartDataOptions.chartSeriesTypes.length == 2) {
-            canvasJSChartOptions['axisY2'] = chartDataOptions.chartSeriesTypes[1].axis;
-            if (canvasJSChartOptions['toolTip'] &&
-              chartDataOptions.chartSeriesTypes[1].tooltip &&
-              chartDataOptions.chartSeriesTypes[1].tooltip.contentFormatter) {
-              canvasJSChartOptions['toolTip'] = {
-                "contentFormatter": function (e) {
-                  if (e.entries[0].dataSeries.axisYType === 'secondary') {
-                    return chartDataOptions.chartSeriesTypes[1].tooltip.contentFormatter(e);
-                  } else {
-                    return chartDataOptions.chartSeriesTypes[0].tooltip.contentFormatter(e);
-                  }
-                }
-              }
-            } else if (!canvasJSChartOptions['toolTip'] &&
-              chartDataOptions.chartSeriesTypes[1].tooltip &&
-              chartDataOptions.chartSeriesTypes[1].tooltip.contentFormatter) {
-              canvasJSChartOptions['toolTip'] = chartDataOptions.chartSeriesTypes[1].tooltip;
-            }
-            _.forEach(chartDataOptions.chartSeriesTypes[1].data, function (dataSet) {
-              console.log('data set series 2', dataSet);
-              dataSet['axisYType'] = 'secondary';
-              canvasJSChartOptions['data'].push(dataSet);
-            });
-          }
+        if ($scope.chartDataOptions.chartSeriesTypes.length < 3) {
+          doSetupChart(canvasJSChartOptions, $scope.chartDataOptions.chartSeriesTypes);
         } else {
+          var chartSeriesTypes = [];
+          _.forEach($scope.chartDataOptions.chartSeriesTypes, function (series) {
+            if (!series.selected) return;
 
+            chartSeriesTypes.push(series);
+          });
+          doSetupChart(canvasJSChartOptions, chartSeriesTypes);
         }
 
-        console.log('canvasJSChartOptions - done', canvasJSChartOptions);
-//        if (!$scope.chart) {
-//          $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
-//        } else {
-//          $scope.chart.options = canvasJSChartOptions;
-//        }
-//        //
-//        $scope.chart.render();
+        $scope.chart = null;
+        $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
+        $scope.chart.render();
 
         $ionicLoading.hide();
       };
 
+      $scope.seriesClicked = function (series) {
+
+        var selected = _.where($scope.chartDataOptions.chartSeriesTypes, {
+          "selected": true
+        });
+
+        if (selected.length > 2) series.selected = false;
+        else if (selected.length == 0) series.selected = true;
+
+        $scope.selectedFlightChanged();
+      }
+
       $scope.$watch('service.selectedKey', function () {
         $scope.selectedFlightChanged();
       });
-}])
-  .controller('PlaylistsCtrl', function ($scope) {
-    $scope.playlists = [
-      {
-        title: 'Reggae',
-        id: 1
-    },
-      {
-        title: 'Chill',
-        id: 2
-    },
-      {
-        title: 'Dubstep',
-        id: 3
-    },
-      {
-        title: 'Indie',
-        id: 4
-    },
-      {
-        title: 'Rap',
-        id: 5
-    },
-      {
-        title: 'Cowbell',
-        id: 6
-    }
-  ];
-  })
-
-.controller('PlaylistCtrl', function ($scope, $stateParams) {});
+}]);
