@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.monstarmike.telemetry.plugins" version="1.0.0">
+  <name>Telemetry Plugins</name>
+  <description>Plugins used for RC telemetry</description>
+  <license>GPL v2</license>
+
+  <js-module src="www/decoder.js" name="tlmDecoder">
+    <clobbers target="com.monstarmike.telemetry.plugins.tlmDecoder" />
+  </js-module>
+
+  <!-- android -->
+  <platform name="android">
+    <source-file src="src/android/TLMDecoder.java" target-dir="src/com/monstarmike/telemetry/plugins" />
+    <source-file src="src/android/libs/guava-18.0.jar" target-dir="libs" />
+    <source-file src="src/android/libs/joda-time-2.7.jar" target-dir="libs" />
+    <source-file src="src/android/libs/tlmreader.jar" target-dir="libs" />
+    <config-file target="config.xml" parent="/*">
+      <feature name="TLMDecoder">
+        <param name="android-package" value="com.monstarmike.telemetry.plugins.TLMDecoder" />
+      </feature>
+    </config-file>
+  </platform>
+</plugin>

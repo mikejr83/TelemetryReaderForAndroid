@@ -1,5 +1,4 @@
 angular.module('telemetryReaderForAndroid.services', [])
-
   .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
     this.flights = null;
     this.selectedFlight = null;
@@ -154,8 +153,12 @@ angular.module('telemetryReaderForAndroid.services', [])
       var deferred = $q.defer(),
         that = this;
 
-      if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.decodeFile) {
-        window.com.monstarmike.telemetry.decodeFile(function (data) {
+      if (window.com && window.com.monstarmike 
+          && window.com.monstarmike.telemetry 
+          && window.com.monstarmike.telemetry.plugins 
+          && window.com.monstarmike.telemetry.plugins.tlmDecoder 
+          && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFile) {
+        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFile(function (data) {
             if (storeAsCurrent && data) {
               that._setCurrentData(that.flights);
             }
