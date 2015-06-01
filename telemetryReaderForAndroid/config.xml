@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.ionicframework.telemetryreaderforandroid502024" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>telemetryReaderForAndroid</name>
+<widget id="com.monstarmike.telemetry.telemetryreader" version="0.1" 
+		xmlns="http://www.w3.org/ns/widgets" 
+		xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>Telemetry Reader</name>
   <description>
-        An Ionic Framework and Cordova project.
+        Telemetry Reader for Android. Read Spektrum telemetry on your Android device.
     </description>
-  <author email="hi@ionicframework" href="http://ionicframework.com/">
-      Ionic Framework Team
+  <author email="monstarmik@gmail.com" href="https://github.com/mikejr83/TelemetryReaderForAndroid">
+      MonstarMike
     </author>
   <content src="index.html"/>
   <access origin="*"/>

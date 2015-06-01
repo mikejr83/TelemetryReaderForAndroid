@@ -18,7 +18,11 @@
     "org.apache.cordova.console",
     "com.ionic.keyboard",
     "org.apache.cordova.device",
-    "..\\plugins\\com.monstarmike.telemetry"
+    "..\\plugins\\com.monstarmike.telemetry.plugins",
+    {
+      "locator": "../plugins/com.monstarmike.telemetry.plugins.tlmDecoder",
+      "id": "com.monstarmike.telemetry.plugins"
+    }
   ],
   "cordovaPlatforms": [
     "android"
