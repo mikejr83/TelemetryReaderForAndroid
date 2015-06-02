@@ -157,8 +157,8 @@ angular.module('telemetryReaderForAndroid.services', [])
           && window.com.monstarmike.telemetry 
           && window.com.monstarmike.telemetry.plugins 
           && window.com.monstarmike.telemetry.plugins.tlmDecoder 
-          && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFile) {
-        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFile(function (data) {
+          && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
+        window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile(function (data) {
             if (storeAsCurrent && data) {
               that._setCurrentData(that.flights);
             }
