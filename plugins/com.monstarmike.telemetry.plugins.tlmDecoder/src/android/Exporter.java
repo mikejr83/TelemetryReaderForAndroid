@@ -1,6 +1,7 @@
 package com.monstarmike.telemetry.plugins;
 
 import android.net.Uri;
+import android.preference.PreferenceActivity;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -23,6 +24,8 @@ import com.monstarmike.tlmreader.datablock.StandardBlock;
 import com.monstarmike.tlmreader.datablock.VarioBlock;
 import com.monstarmike.tlmreader.datablock.VoltageBlock;
 
+import java.util.Iterator;
+
 public class Exporter {
     Iterable<Flight> flights;
     Uri uri;
@@ -37,22 +40,12 @@ public class Exporter {
             "                \"text\": \"Altitude\"\n" +
             "              },\n" +
             "              \"axisX\": {\n" +
-            "                \"title\": \"Time\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return _timeTickFormatter(e.value);\n" +
-            "                }\n" +
+            "                \"title\": \"Time\"\n" +
             "              },\n" +
             "              \"axisY\": {\n" +
-            "                \"title\": \"Altitude (meters)\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return (e.value / 10) + \"m\"\n" +
-            "                }\n" +
+            "                \"title\": \"Altitude (meters)\"\n" +
             "              },\n" +
             "              \"toolTip\": {\n" +
-            "                \"contentFormatter\": function (e) {\n" +
-            "                  var dataPoint = e.entries[0].dataPoint;\n" +
-            "                  return (dataPoint.y / 10) + 'm (' + _timeTickFormatter(dataPoint.x) + ')';\n" +
-            "                }\n" +
             "              }\n" +
             "            },\n" +
             "            \"chartSeriesTypes\": [\n" +
@@ -75,22 +68,12 @@ public class Exporter {
             "                \"text\": \"Current\"\n" +
             "              },\n" +
             "              \"axisX\": {\n" +
-            "                \"title\": \"Time\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return _timeTickFormatter(e.value);\n" +
-            "                }\n" +
+            "                \"title\": \"Time\"\n" +
             "              },\n" +
             "              \"axisY\": {\n" +
-            "                \"title\": \"Current (mA)\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return (e.value / 10) + 'A'\n" +
-            "                }\n" +
+            "                \"title\": \"Current (mA)\"\n" +
             "              },\n" +
             "              \"toolTip\": {\n" +
-            "                \"contentFormatter\": function (e) {\n" +
-            "                  var dataPoint = e.entries[0].dataPoint;\n" +
-            "                  return (dataPoint.y / 10) + 'A (' + _timeTickFormatter(dataPoint.x) + ')';\n" +
-            "                }\n" +
             "              }\n" +
             "            },\n" +
             "            \"chartSeriesTypes\": [\n" +
@@ -111,34 +94,19 @@ public class Exporter {
             "              \"text\": \"G-Force\"\n" +
             "            },\n" +
             "            \"legend\": {\n" +
-            "              \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
-            "              \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
-            "              //            \"fontSize\": 15\n" +
+            "              \"horizontalAlign\": \"center\",\n" +
+            "              \"verticalAlign\": \"bottom\"\n" +
             "            },\n" +
             "            \"axisX\": {\n" +
-            "              \"title\": \"Time\",\n" +
-            "              \"labelFormatter\": function (e) {\n" +
-            "                return _timeTickFormatter(e.value);\n" +
-            "              }\n" +
+            "              \"title\": \"Time\"\n" +
             "            },\n" +
             "            \"axisY\": {\n" +
             "              \"title\": \"Volts\"\n" +
             "            },\n" +
             "            \"axisY2\": {\n" +
-            "              \"title\": \"Capacity (mAh)\",\n" +
-            "              \"labelFormatter\": function (e) {\n" +
-            "                return (e.value) + \"mAh\"\n" +
-            "              }\n" +
+            "              \"title\": \"Capacity (mAh)\"\n" +
             "            },\n" +
             "            \"toolTip\": {\n" +
-            "              \"contentFormatter\": function (e) {\n" +
-            "                var entry = e.entries[0];\n" +
-            "                if (entry.dataSeries.axisYType === 'primary') {\n" +
-            "                  return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                } else {\n" +
-            "                  return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                }\n" +
-            "              }\n" +
             "            },\n" +
             "            \"data\": [\n" +
             "              {\n" +
@@ -177,15 +145,11 @@ public class Exporter {
             "                \"text\": \"PowerBox\"\n" +
             "              },\n" +
             "              \"legend\": {\n" +
-            "                \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
-            "                \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
-            "                //            \"fontSize\": 15\n" +
+            "                \"horizontalAlign\": \"center\",\n" +
+            "                \"verticalAlign\": \"bottom\"\n" +
             "              },\n" +
             "              \"axisX\": {\n" +
-            "                \"title\": \"Time\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return _timeTickFormatter(e.value);\n" +
-            "                }\n" +
+            "                \"title\": \"Time\"\n" +
             "              }\n" +
             "            },\n" +
             "            \"chartSeriesTypes\": [\n" +
@@ -195,10 +159,6 @@ public class Exporter {
             "                  \"title\": \"Volts\"\n" +
             "                },\n" +
             "                \"tooltip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    var entry = e.entries[0];\n" +
-            "                    return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -218,16 +178,9 @@ public class Exporter {
             "              {\n" +
             "                \"selected\": true,\n" +
             "                \"axis\": {\n" +
-            "                  \"title\": \"Capacity (mAh)\",\n" +
-            "                  \"labelFormatter\": function (e) {\n" +
-            "                    return (e.value) + \"mAh\"\n" +
-            "                  }\n" +
+            "                  \"title\": \"Capacity (mAh)\"\n" +
             "                },\n" +
             "                \"tooltip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    var entry = e.entries[0];\n" +
-            "                    return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -254,27 +207,20 @@ public class Exporter {
             "                \"text\": \"RX\"\n" +
             "              },\n" +
             "              \"legend\": {\n" +
-            "                \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
-            "                \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
-            "                //            \"fontSize\": 15\n" +
+            "                \"horizontalAlign\": \"center\",\n" +
+            "                \"verticalAlign\": \"bottom\"\n" +
             "              },\n" +
             "              \"axisX\": {\n" +
-            "                \"title\": \"Time\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return _timeTickFormatter(e.value);\n" +
-            "                }\n" +
+            "                \"title\": \"Time\"\n" +
             "              }\n" +
             "            },\n" +
-            "            chartSeriesTypes: [\n" +
+            "            \"chartSeriesTypes\": [\n" +
             "              {\n" +
             "                \"selected\": true,\n" +
             "                \"axis\": {\n" +
             "                  \"title\": \"Signal\"\n" +
             "                },\n" +
             "                \"tooltip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    return entry.dataPoint.y\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -330,16 +276,9 @@ public class Exporter {
             "                \"selected\": false,\n" +
             "                \"axis\": {\n" +
             "                  \"title\": \"Volts\",\n" +
-            "                  \"labelFormatter\": function (e) {\n" +
-            "                    return e.value / 100;\n" +
-            "                  },\n" +
             "                  \"minimum\": 0\n" +
             "                },\n" +
             "                \"toolTip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    var entry = e.entries[0];\n" +
-            "                    return (entry.dataPoint.y / 100) + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -360,15 +299,11 @@ public class Exporter {
             "                \"text\": \"RX\"\n" +
             "              },\n" +
             "              \"legend\": {\n" +
-            "                \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
-            "                \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
-            "                //            \"fontSize\": 15\n" +
+            "                \"horizontalAlign\": \"center\",\n" +
+            "                \"verticalAlign\": \"bottom\"\n" +
             "              },\n" +
             "              \"axisX\": {\n" +
-            "                \"title\": \"Time\",\n" +
-            "                \"labelFormatter\": function (e) {\n" +
-            "                  return _timeTickFormatter(e.value);\n" +
-            "                }\n" +
+            "                \"title\": \"Time\"\n" +
             "              }\n" +
             "            },\n" +
             "            \"chartSeriesTypes\": [\n" +
@@ -376,16 +311,9 @@ public class Exporter {
             "                \"selected\": true,\n" +
             "                \"axis\": {\n" +
             "                  \"title\": \"RPM\",\n" +
-            "                  \"labelFormatter\": function (e) {\n" +
-            "                    return e.value;\n" +
-            "                  },\n" +
             "                  \"minimum\": 0\n" +
             "                },\n" +
             "                \"tooltip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    var entry = e.entries[0];\n" +
-            "                    return entry.dataPoint.y + ' RPM (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -400,16 +328,9 @@ public class Exporter {
             "                \"selected\": true,\n" +
             "                \"axis\": {\n" +
             "                  \"title\": \"Temperature\",\n" +
-            "                  \"labelFormatter\": function (e) {\n" +
-            "                    return e.value;\n" +
-            "                  },\n" +
             "                  \"minimum\": -100\n" +
             "                },\n" +
             "                \"tooltip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    var entry = e.entries[0];\n" +
-            "                    return entry.dataPoint.y + ' degrees (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -424,16 +345,9 @@ public class Exporter {
             "                \"selected\": false,\n" +
             "                \"axis\": {\n" +
             "                  \"title\": \"Volts\",\n" +
-            "                  \"labelFormatter\": function (e) {\n" +
-            "                    return e.value / 100;\n" +
-            "                  },\n" +
             "                  \"minimum\": 0\n" +
             "                },\n" +
             "                \"tooltip\": {\n" +
-            "                  \"contentFormatter\": function (e) {\n" +
-            "                    var entry = e.entries[0];\n" +
-            "                    return (entry.dataPoint.y / 100 )+ ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
-            "                  }\n" +
             "                },\n" +
             "                \"data\": [\n" +
             "                  {\n" +
@@ -453,10 +367,7 @@ public class Exporter {
             "          \"startEffect\": \"easeOutSine\",\n" +
             "          \"theme\": \"light\",\n" +
             "          \"categoryAxis\": {\n" +
-            "            \"gridPosition\": \"start\",\n" +
-            "            \"labelFunction\": function (value, serialDataItem, categoryAxis) {\n" +
-            "              return _timeTickFormatter(value);\n" +
-            "            }\n" +
+            "            \"gridPosition\": \"start\"\n" +
             "          },\n" +
             "          \"trendLines\": [],\n" +
             "          \"graphs\": [],\n" +
@@ -491,8 +402,15 @@ public class Exporter {
             e.printStackTrace();
         }
 
+        int index = 0;
         for (Flight flight : this.flights) {
-            flightsArray.put(this.buildFlight(false, flight));
+            JSONObject flightJO =this.buildFlight(false, flight);
+                try {
+                    flightJO.put("_id", index++);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                flightsArray.put(flightJO);
         }
 
         return file;
@@ -500,6 +418,7 @@ public class Exporter {
 
     public JSONObject exportFlightData(JSONObject flightJO) {
         JSONObject newFlightJO = null;
+        int index = 0;
         for (Flight flight : this.flights) {
             int joId = 0;
             try {
@@ -508,10 +427,23 @@ public class Exporter {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            if (flight.hashCode() != joId)
-                continue;
 
+            if (index != joId) {
+                Log.d(TAG, "Flight index: " + index + " != passed in value: " + joId);
+                index++;
+                continue;
+            }
+
+            Log.d(TAG, "Found flight. Going to do a full decode.");
             newFlightJO = this.buildFlight(true, flight);
+            if(newFlightJO != null) {
+                try {
+                    newFlightJO.put("_id", joId);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            break;
         }
 
         return newFlightJO;
@@ -522,7 +454,9 @@ public class Exporter {
         try {
             flightJO.put("_id", flight.hashCode());
             flightJO.put("duration", flight.get_duration().getMillis());
-            for(HeaderBlock headerBlock : (Iterable<HeaderBlock>)flight.get_headerBlocks()) {
+                Iterator<HeaderBlock> iterator = flight.get_headerBlocks();
+            while(iterator.hasNext()) {
+              HeaderBlock headerBlock = iterator.next();
               if (headerBlock instanceof HeaderNameBlock) {
                 HeaderNameBlock nameBlock = (HeaderNameBlock)headerBlock;
                 flightJO.put("name", nameBlock.get_modelName());
@@ -558,8 +492,11 @@ public class Exporter {
                 }
 
                 if (b instanceof HeaderBlock) {
-                    handleHeaderBlock(flightJO, blockJSON, flight,
-                            (HeaderBlock) b);
+                    try {
+                        handleHeaderBlock(flightJO, (HeaderBlock) b);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 } else if (b instanceof DataBlock) {
                     try {
                         handleDataBlock(flightData, blockJSON, (DataBlock) b);
@@ -587,9 +524,27 @@ public class Exporter {
                 .getJSONArray("dataPoints");
     }
 
-    void handleHeaderBlock(JSONObject fjsonFlight, JSONObject jsonBlock,
-                           Flight flight, HeaderBlock headerBlock) {
+    void handleHeaderBlock(JSONObject jsonFlight, HeaderBlock headerBlock) throws JSONException {
+        JSONObject jsonHeaderBlock = null;
 
+        if (headerBlock instanceof HeaderNameBlock) {
+            HeaderNameBlock nameBlock = (HeaderNameBlock) headerBlock;
+            jsonHeaderBlock = new JSONObject();
+            jsonHeaderBlock.put("modelNumber", nameBlock.get_modelNumber());
+            jsonHeaderBlock.put("bindInfo", nameBlock.get_bindInfo());
+            jsonHeaderBlock.put("modelName", nameBlock.get_modelName());
+            jsonHeaderBlock.put("modelType", nameBlock.get_modelType());
+        }
+
+        if(jsonHeaderBlock == null) return;
+
+        if(jsonFlight.has("headers")) {
+            jsonFlight.getJSONArray("headers").put(jsonHeaderBlock);
+        } else {
+            JSONArray headersArray = new JSONArray();
+            headersArray.put(jsonHeaderBlock);
+            jsonFlight.put("headers", headersArray);
+        }
     }
 
     void handleDataBlock(JSONObject flightData, JSONObject jsonBlock, DataBlock dataBlock) throws JSONException {
@@ -598,7 +553,9 @@ public class Exporter {
         if (dataBlock instanceof AirspeedBlock) {
 
         } else if (dataBlock instanceof AltitudeBlock) {
-            this.findDataPointsArray(flightData, "altitude", 0, 0).put(jsonBlock);
+            JSONArray dataPoints =this.findDataPointsArray(flightData, "altitude", 0, 0);
+
+            dataPoints.put(jsonBlock);
             jsonBlock.put("altitude",
                     ((AltitudeBlock) dataBlock).get_altitudeInTenthsOfAMeter());
         } else if (dataBlock instanceof CurrentBlock) {

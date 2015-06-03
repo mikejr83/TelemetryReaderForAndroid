@@ -38,7 +38,24 @@ public class TLMDecoder extends CordovaPlugin {
         } else if (action.equalsIgnoreCase("readFlight")) {
             JSONObject file = args.getJSONObject(0);
             JSONObject flightJO = args.getJSONObject(1);
-            callbackContext.success(this.buildFlight(file, flightJO));
+
+            if (file != null){
+                Log.d(TAG, "file: " + file.toString());
+            } else {
+                Log.w(TAG, "File was passed in null. This probably won't end well!");
+            }
+
+            if(flightJO == null) {
+                Log.w(TAG, "Flight was passed in null. This probably won't end well!");
+            }
+
+            JSONObject decodedFlight = this.buildFlight(file, flightJO);
+
+            if(decodedFlight != null) {
+                callbackContext.success(decodedFlight);
+            } else {
+                callbackContext.error("There was an issue while trying to decode the flight. The decoded flight object was null!");
+            }
         }
 
         return true;
@@ -89,6 +106,8 @@ public class TLMDecoder extends CordovaPlugin {
         if (uri == null) {
             Log.w(TAG, "Returning the default flight object that was passed in.");
             return flightJO;
+        } else {
+            Log.d(TAG, "URI: " + uri.toString());
         }
 
         InputStream inputStream = null;
@@ -122,4 +141,3 @@ public class TLMDecoder extends CordovaPlugin {
         return exporter.exportFlightData(flightJO);
 	}
 }
-

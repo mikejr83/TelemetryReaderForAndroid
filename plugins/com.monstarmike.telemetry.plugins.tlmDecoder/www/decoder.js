@@ -21,7 +21,7 @@ TelemetryDecoder.openFile = function(pass, fail) {
   }, "TLMDecoder", "openFile", []);
 };
 
-TelemetryDecoder.decodeFlight = function(pass, fail) {
+TelemetryDecoder.decodeFlight = function(file, flight, pass, fail) {
   exec(function (result) {
     console.log("Result:", result);
     if (pass) {
@@ -33,7 +33,7 @@ TelemetryDecoder.decodeFlight = function(pass, fail) {
     if (fail) {
       fail(e);
     }
-  }, "TLMDecoder", "readFlight", []);
+  }, "TLMDecoder", "readFlight", [file, flight]);
 };
 
 module.exports = TelemetryDecoder;
