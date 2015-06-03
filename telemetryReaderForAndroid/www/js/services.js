@@ -1,14 +1,14 @@
 angular.module('telemetryReaderForAndroid.services', [])
   .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
-    this.flights = null;
+    this.file = null;
     this.selectedFlight = null;
     this.selectedKey = 'altitude';
     this.selectedTitle = 'Altitude';
     this.chart = null;
 
     this._setCurrentData = function (data) {
-      this.flights = data;
-      _.forEach(this.flights, function (flight, index) {
+      this.file = data;
+      _.forEach(this.file.flights, function (flight, index) {
         //        if (!flight.blocks || flight.blocks.length == 8) return;
 
         if (!flight.name) {
@@ -32,7 +32,7 @@ angular.module('telemetryReaderForAndroid.services', [])
           flight.name = 'Flight ' + (index + 1) + ' - ' + durationStr;
         }
 
-        flight.flightData = chartDefinitionsService.getChartDefinitions(flight.blocks.length > 8 ? flight.blocks[8].timestamp * 10 : 0);
+        /*flight.flightData = chartDefinitionsService.getChartDefinitions(flight.blocks.length > 8 ? flight.blocks[8].timestamp * 10 : 0);
 
         var converter = {
           "altitude": function (chartOptions, block) {
@@ -124,7 +124,7 @@ angular.module('telemetryReaderForAndroid.services', [])
             converter[key](flight.flightData[key], block);
           }
 
-        });
+        });*/
       });
     };
 
@@ -135,12 +135,12 @@ angular.module('telemetryReaderForAndroid.services', [])
 
       if (testOne) {
         console.log('testone');
-        $http.get('js/data.json').then(function (response) {
+        $http.get('js/file_data.json').then(function (response) {
           deferred.resolve(response.data);
         });
       } else {
         console.log('test two');
-        $http.get('js/data2.json').then(function (response) {
+        $http.get('js/file_data.json').then(function (response) {
           deferred.resolve(response.data);
         });
       }
@@ -160,7 +160,7 @@ angular.module('telemetryReaderForAndroid.services', [])
           && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
         window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile(function (data) {
             if (storeAsCurrent && data) {
-              that._setCurrentData(that.flights);
+              that._setCurrentData(that.file);
             }
 
             deferred.resolve(data);
@@ -172,7 +172,7 @@ angular.module('telemetryReaderForAndroid.services', [])
         console.log('getting test data');
         this.getTestData().then(function (data) {
           that._setCurrentData(data);
-          deferred.resolve(that.flights);
+          deferred.resolve(that.file);
         });
       }
 
@@ -184,14 +184,38 @@ angular.module('telemetryReaderForAndroid.services', [])
         that = this;
 
       if (this.flights != null) {
-        deferred.resolve(this.flights);
+        deferred.resolve(this.file);
       } else {
         this.loadData().then(function (data) {
           that._setCurrentData(data);
-          deferred.resolve(that.flights);
+          deferred.resolve(that.file);
         });
       }
 
       return deferred.promise;
     };
-      }])
+    
+    this.setSelectedFlight = function (flight) {
+      var deferred = $q.defer(),
+        that = this;
+
+      console.log("setting the current flight", flight);
+      
+      if (window.com && window.com.monstarmike 
+          && window.com.monstarmike.telemetry 
+          && window.com.monstarmike.telemetry.plugins 
+          && window.com.monstarmike.telemetry.plugins.tlmDecoder 
+          && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
+        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file, flight, function (decodedFlight) {
+          console.log(decodedFlight);
+          that.selectedFlight = decodedFlight;
+          deferred.resolve(that.selectedFlight);
+        }, function (error) {
+          console.error("error during decoding of flight.", error);
+          deferred.reject();
+        });
+      }
+      
+      return deferred.promise;
+    };
+      }]);

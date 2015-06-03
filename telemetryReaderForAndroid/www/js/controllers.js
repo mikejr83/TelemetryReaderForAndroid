@@ -34,10 +34,11 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
 
         if (!$scope.service.flights) {
           $ionicLoading.show();
-          dataService.getCurrentData().then(function (data) {
-            if (data && data[0]) {
-              $scope.service.selectedFlight = data[0];
-              $scope.selectedFlightChanged();
+          dataService.getCurrentData().then(function (file) {
+            if (file && file.flights && file.flights.length > 0) {
+              $scope.service.setSelectedFlight(file.flights[0]).then(function() {
+                $scope.selectedFlightChanged();
+              });
             } else {
               $ionicLoading.hide();
             }
@@ -120,12 +121,22 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           doSetupChart(canvasJSChartOptions, chartSeriesTypes);
         }
 
+        console.log("CanvasJSChartOptions - ready to go!", canvasJSChartOptions);
+
         $scope.chart = null;
         $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
         $scope.chart.render();
 
         $ionicLoading.hide();
       };
+
+      $scope.selectChanged = function (flight) {
+        $ionicLoading.show();
+        $scope.service.setSelectedFlight(flight).then(function(decodedFlight) {
+          console.log('JSON String:', JSON.stringify(decodedFlight))
+          $scope.selectedFlightChanged();
+        });
+      }
 
       $scope.seriesClicked = function (series) {
 
