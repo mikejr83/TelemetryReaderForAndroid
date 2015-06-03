@@ -1,5 +1,8 @@
 package com.monstarmike.telemetry.plugins;
 
+import android.net.Uri;
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +15,8 @@ import com.monstarmike.tlmreader.datablock.CurrentBlock;
 import com.monstarmike.tlmreader.datablock.DataBlock;
 import com.monstarmike.tlmreader.datablock.GForceBlock;
 import com.monstarmike.tlmreader.datablock.HeaderBlock;
+import com.monstarmike.tlmreader.datablock.HeaderDataBlock;
+import com.monstarmike.tlmreader.datablock.HeaderNameBlock;
 import com.monstarmike.tlmreader.datablock.PowerboxBlock;
 import com.monstarmike.tlmreader.datablock.RXBlock;
 import com.monstarmike.tlmreader.datablock.StandardBlock;
@@ -20,9 +25,458 @@ import com.monstarmike.tlmreader.datablock.VoltageBlock;
 
 public class Exporter {
     Iterable<Flight> flights;
+    Uri uri;
 
-    public Exporter(Iterable<Flight> flights) {
+    private static final String TAG = "TLMDecoder";
+    private static final String JSONTemplate = "{\n" +
+            "          \"altitude\": {\n" +
+            "            \"basic\": {\n" +
+            "              \"zoomEnabled\": true,\n" +
+            "              \"animationEnabled\": true,\n" +
+            "              \"title\": {\n" +
+            "                \"text\": \"Altitude\"\n" +
+            "              },\n" +
+            "              \"axisX\": {\n" +
+            "                \"title\": \"Time\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return _timeTickFormatter(e.value);\n" +
+            "                }\n" +
+            "              },\n" +
+            "              \"axisY\": {\n" +
+            "                \"title\": \"Altitude (meters)\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return (e.value / 10) + \"m\"\n" +
+            "                }\n" +
+            "              },\n" +
+            "              \"toolTip\": {\n" +
+            "                \"contentFormatter\": function (e) {\n" +
+            "                  var dataPoint = e.entries[0].dataPoint;\n" +
+            "                  return (dataPoint.y / 10) + 'm (' + _timeTickFormatter(dataPoint.x) + ')';\n" +
+            "                }\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"chartSeriesTypes\": [\n" +
+            "              {\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"name\": \"Altitude\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            }\n" +
+            "          ]\n" +
+            "          },\n" +
+            "          \"current\": {\n" +
+            "            \"basic\": {\n" +
+            "              \"zoomEnabled\": true,\n" +
+            "              \"animationEnabled\": true,\n" +
+            "              \"title\": {\n" +
+            "                \"text\": \"Current\"\n" +
+            "              },\n" +
+            "              \"axisX\": {\n" +
+            "                \"title\": \"Time\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return _timeTickFormatter(e.value);\n" +
+            "                }\n" +
+            "              },\n" +
+            "              \"axisY\": {\n" +
+            "                \"title\": \"Current (mA)\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return (e.value / 10) + 'A'\n" +
+            "                }\n" +
+            "              },\n" +
+            "              \"toolTip\": {\n" +
+            "                \"contentFormatter\": function (e) {\n" +
+            "                  var dataPoint = e.entries[0].dataPoint;\n" +
+            "                  return (dataPoint.y / 10) + 'A (' + _timeTickFormatter(dataPoint.x) + ')';\n" +
+            "                }\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"chartSeriesTypes\": [\n" +
+            "              {\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"name\": \"Current\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            }\n" +
+            "          ]\n" +
+            "          },\n" +
+            "          \"gforce\": {\n" +
+            "            \"animationEnabled\": true,\n" +
+            "            \"title\": {\n" +
+            "              \"text\": \"G-Force\"\n" +
+            "            },\n" +
+            "            \"legend\": {\n" +
+            "              \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
+            "              \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
+            "              //            \"fontSize\": 15\n" +
+            "            },\n" +
+            "            \"axisX\": {\n" +
+            "              \"title\": \"Time\",\n" +
+            "              \"labelFormatter\": function (e) {\n" +
+            "                return _timeTickFormatter(e.value);\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"axisY\": {\n" +
+            "              \"title\": \"Volts\"\n" +
+            "            },\n" +
+            "            \"axisY2\": {\n" +
+            "              \"title\": \"Capacity (mAh)\",\n" +
+            "              \"labelFormatter\": function (e) {\n" +
+            "                return (e.value) + \"mAh\"\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"toolTip\": {\n" +
+            "              \"contentFormatter\": function (e) {\n" +
+            "                var entry = e.entries[0];\n" +
+            "                if (entry.dataSeries.axisYType === 'primary') {\n" +
+            "                  return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                } else {\n" +
+            "                  return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                }\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"data\": [\n" +
+            "              {\n" +
+            "                \"showInLegend\": true,\n" +
+            "                \"name\": \"Voltage One\",\n" +
+            "                \"type\": \"line\",\n" +
+            "                \"dataPoints\": []\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"showInLegend\": true,\n" +
+            "                \"name\": \"Voltage Two\",\n" +
+            "                \"type\": \"line\",\n" +
+            "                \"dataPoints\": []\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"showInLegend\": true,\n" +
+            "                \"name\": \"Capacity One\",\n" +
+            "                \"type\": \"line\",\n" +
+            "                \"axisYType\": \"secondary\",\n" +
+            "                \"dataPoints\": []\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"showInLegend\": true,\n" +
+            "                \"name\": \"Capacity Two\",\n" +
+            "                \"type\": \"line\",\n" +
+            "                \"axisYType\": \"secondary\",\n" +
+            "                \"dataPoints\": []\n" +
+            "            }\n" +
+            "          ]\n" +
+            "          },\n" +
+            "          \"powerbox\": {\n" +
+            "            \"basic\": {\n" +
+            "              \"zoomEnabled\": true,\n" +
+            "              \"animationEnabled\": true,\n" +
+            "              \"title\": {\n" +
+            "                \"text\": \"PowerBox\"\n" +
+            "              },\n" +
+            "              \"legend\": {\n" +
+            "                \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
+            "                \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
+            "                //            \"fontSize\": 15\n" +
+            "              },\n" +
+            "              \"axisX\": {\n" +
+            "                \"title\": \"Time\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return _timeTickFormatter(e.value);\n" +
+            "                }\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"chartSeriesTypes\": [\n" +
+            "              {\n" +
+            "                \"selected\": true,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Volts\"\n" +
+            "                },\n" +
+            "                \"tooltip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    var entry = e.entries[0];\n" +
+            "                    return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Voltage One\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                },\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Voltage Two\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"selected\": true,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Capacity (mAh)\",\n" +
+            "                  \"labelFormatter\": function (e) {\n" +
+            "                    return (e.value) + \"mAh\"\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"tooltip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    var entry = e.entries[0];\n" +
+            "                    return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Capacity One\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                },\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Capacity Two\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            }\n" +
+            "          ]\n" +
+            "          },\n" +
+            "          \"rx\": {\n" +
+            "            \"basic\": {\n" +
+            "              \"animationEnabled\": true,\n" +
+            "              \"zoomEnabled\": true,\n" +
+            "              \"title\": {\n" +
+            "                \"text\": \"RX\"\n" +
+            "              },\n" +
+            "              \"legend\": {\n" +
+            "                \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
+            "                \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
+            "                //            \"fontSize\": 15\n" +
+            "              },\n" +
+            "              \"axisX\": {\n" +
+            "                \"title\": \"Time\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return _timeTickFormatter(e.value);\n" +
+            "                }\n" +
+            "              }\n" +
+            "            },\n" +
+            "            chartSeriesTypes: [\n" +
+            "              {\n" +
+            "                \"selected\": true,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Signal\"\n" +
+            "                },\n" +
+            "                \"tooltip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    return entry.dataPoint.y\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"A\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                },\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"B\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                },\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"L\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                },\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"R\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"selected\": true,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Fades and Holds\",\n" +
+            "                  \"minimum\": 0\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Frame Loss\",\n" +
+            "                    \"axisYType\": \"secondary\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                },\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Holds\",\n" +
+            "                    \"axisYType\": \"secondary\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"selected\": false,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Volts\",\n" +
+            "                  \"labelFormatter\": function (e) {\n" +
+            "                    return e.value / 100;\n" +
+            "                  },\n" +
+            "                  \"minimum\": 0\n" +
+            "                },\n" +
+            "                \"toolTip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    var entry = e.entries[0];\n" +
+            "                    return (entry.dataPoint.y / 100) + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"RX Voltage\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            }\n" +
+            "          ]\n" +
+            "          },\n" +
+            "          \"standard\": {\n" +
+            "            \"basic\": {\n" +
+            "              \"animationEnabled\": true,\n" +
+            "              \"zoomEnabled\": true,\n" +
+            "              \"title\": {\n" +
+            "                \"text\": \"RX\"\n" +
+            "              },\n" +
+            "              \"legend\": {\n" +
+            "                \"horizontalAlign\": \"center\", // \"center\" , \"right\"\n" +
+            "                \"verticalAlign\": \"bottom\", // \"top\" , \"bottom\"\n" +
+            "                //            \"fontSize\": 15\n" +
+            "              },\n" +
+            "              \"axisX\": {\n" +
+            "                \"title\": \"Time\",\n" +
+            "                \"labelFormatter\": function (e) {\n" +
+            "                  return _timeTickFormatter(e.value);\n" +
+            "                }\n" +
+            "              }\n" +
+            "            },\n" +
+            "            \"chartSeriesTypes\": [\n" +
+            "              {\n" +
+            "                \"selected\": true,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"RPM\",\n" +
+            "                  \"labelFormatter\": function (e) {\n" +
+            "                    return e.value;\n" +
+            "                  },\n" +
+            "                  \"minimum\": 0\n" +
+            "                },\n" +
+            "                \"tooltip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    var entry = e.entries[0];\n" +
+            "                    return entry.dataPoint.y + ' RPM (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"RPM\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"selected\": true,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Temperature\",\n" +
+            "                  \"labelFormatter\": function (e) {\n" +
+            "                    return e.value;\n" +
+            "                  },\n" +
+            "                  \"minimum\": -100\n" +
+            "                },\n" +
+            "                \"tooltip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    var entry = e.entries[0];\n" +
+            "                    return entry.dataPoint.y + ' degrees (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Temperature\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                }\n" +
+            "              ]\n" +
+            "            },\n" +
+            "              {\n" +
+            "                \"selected\": false,\n" +
+            "                \"axis\": {\n" +
+            "                  \"title\": \"Volts\",\n" +
+            "                  \"labelFormatter\": function (e) {\n" +
+            "                    return e.value / 100;\n" +
+            "                  },\n" +
+            "                  \"minimum\": 0\n" +
+            "                },\n" +
+            "                \"tooltip\": {\n" +
+            "                  \"contentFormatter\": function (e) {\n" +
+            "                    var entry = e.entries[0];\n" +
+            "                    return (entry.dataPoint.y / 100 )+ ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';\n" +
+            "                  }\n" +
+            "                },\n" +
+            "                \"data\": [\n" +
+            "                  {\n" +
+            "                    \"showInLegend\": true,\n" +
+            "                    \"name\": \"Voltage\",\n" +
+            "                    \"type\": \"line\",\n" +
+            "                    \"dataPoints\": []\n" +
+            "                  }\n" +
+            "                ]\n" +
+            "              }\n" +
+            "          ]\n" +
+            "        },\n" +
+            "        \"vario\": {\n" +
+            "          \"type\": \"serial\",\n" +
+            "          \"categoryField\": \"timestamp\",\n" +
+            "          \"startDuration\": 1,\n" +
+            "          \"startEffect\": \"easeOutSine\",\n" +
+            "          \"theme\": \"light\",\n" +
+            "          \"categoryAxis\": {\n" +
+            "            \"gridPosition\": \"start\",\n" +
+            "            \"labelFunction\": function (value, serialDataItem, categoryAxis) {\n" +
+            "              return _timeTickFormatter(value);\n" +
+            "            }\n" +
+            "          },\n" +
+            "          \"trendLines\": [],\n" +
+            "          \"graphs\": [],\n" +
+            "          \"legend\": {\n" +
+            "            \"useGraphSettings\": true\n" +
+            "          },\n" +
+            "          \"titles\": [\n" +
+            "            {\n" +
+            "              \"id\": \"Title-1\",\n" +
+            "              \"size\": 15,\n" +
+            "              \"text\": \"Vario\"\n" +
+            "                  }\n" +
+            "              ],\n" +
+            "          \"dataProvider\": []\n" +
+            "        }\n" +
+            "      }";
+
+    public Exporter(Uri uri, Iterable<Flight> flights) {
         this.flights = flights;
+        this.uri = uri;
     }
 
     public JSONObject exportFlights() {
@@ -30,7 +484,7 @@ public class Exporter {
 
         JSONArray flightsArray = new JSONArray();
         try {
-            file.put("uri", "file://somefilename.tlm");
+            file.put("uri", uri);
             file.put("flights", flightsArray);
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -68,13 +522,32 @@ public class Exporter {
         try {
             flightJO.put("_id", flight.hashCode());
             flightJO.put("duration", flight.get_duration().getMillis());
+            for(HeaderBlock headerBlock : (Iterable<HeaderBlock>)flight.get_headerBlocks()) {
+              if (headerBlock instanceof HeaderNameBlock) {
+                HeaderNameBlock nameBlock = (HeaderNameBlock)headerBlock;
+                flightJO.put("name", nameBlock.get_modelName());
+                flightJO.put("modelNumber", nameBlock.get_modelNumber());
+                flightJO.put("bindInfo", nameBlock.get_bindInfo());
+                flightJO.put("modelType", nameBlock.get_modelType());
+              }
+            }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         if (includeBlockData) {
-            JSONArray blockArray = new JSONArray();
+            JSONObject flightData = null;
+            try {
+                flightData = this.loadChartDataTemplate();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                flightJO.put("flightData", flightData);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             for (Block b : flight) {
                 JSONObject blockJSON = new JSONObject();
@@ -89,23 +562,29 @@ public class Exporter {
                             (HeaderBlock) b);
                 } else if (b instanceof DataBlock) {
                     try {
-                        handleDataBlock(blockJSON, (DataBlock) b);
+                        handleDataBlock(flightData, blockJSON, (DataBlock) b);
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.w(TAG, "JSON error when working with data block", e);
                     }
                 }
-
-                blockArray.put(blockJSON);
-            }
-
-            try {
-                flightJO.put("blocks", blockArray);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
         }
 
         return flightJO;
+    }
+
+    private JSONObject loadChartDataTemplate() throws JSONException {
+        return new JSONObject(JSONTemplate);
+    }
+
+    private JSONArray findDataPointsArray(JSONObject flightData, String sensorName,
+                                          int seriesPostion, int dataSetPosition) throws JSONException {
+        return flightData.getJSONObject(sensorName)
+                .getJSONArray("chartSeriesTypes")
+                .getJSONObject(seriesPostion)
+                .getJSONArray("data")
+                .getJSONObject(dataSetPosition)
+                .getJSONArray("dataPoints");
     }
 
     void handleHeaderBlock(JSONObject fjsonFlight, JSONObject jsonBlock,
@@ -113,12 +592,13 @@ public class Exporter {
 
     }
 
-    void handleDataBlock(JSONObject jsonBlock, DataBlock dataBlock) throws JSONException {
+    void handleDataBlock(JSONObject flightData, JSONObject jsonBlock, DataBlock dataBlock) throws JSONException {
         jsonBlock.put("timestamp", dataBlock.get_timestamp());
 
         if (dataBlock instanceof AirspeedBlock) {
 
         } else if (dataBlock instanceof AltitudeBlock) {
+            this.findDataPointsArray(flightData, "altitude", 0, 0).put(jsonBlock);
             jsonBlock.put("altitude",
                     ((AltitudeBlock) dataBlock).get_altitudeInTenthsOfAMeter());
         } else if (dataBlock instanceof CurrentBlock) {
