@@ -15,449 +15,406 @@ angular.module('telemetryReaderForAndroid.services')
         };
 
         return {
-          "altitude": {
-            "basic": {
-              "zoomEnabled": true,
-              "animationEnabled": true,
-              "title": {
-                "text": "Altitude"
-              },
-              "axisX": {
-                "title": "Time",
-                "labelFormatter": function (e) {
-                  return _timeTickFormatter(e.value);
-                }
-              },
-              "axisY": {
-                "title": "Altitude (meters)",
-                "labelFormatter": function (e) {
-                  return (e.value / 10) + "m"
-                }
-              },
-              "toolTip": {
-                "contentFormatter": function (e) {
-                  var dataPoint = e.entries[0].dataPoint;
-                  return (dataPoint.y / 10) + 'm (' + _timeTickFormatter(dataPoint.x) + ')';
-                }
-              }
-            },
-            "chartSeriesTypes": [
-              {
-                "data": [
-                  {
-                    "name": "Altitude",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            }
-          ]
-          },
-          "current": {
-            "basic": {
-              "zoomEnabled": true,
-              "animationEnabled": true,
-              "title": {
-                "text": "Current"
-              },
-              "axisX": {
-                "title": "Time",
-                "labelFormatter": function (e) {
-                  return _timeTickFormatter(e.value);
-                }
-              },
-              "axisY": {
-                "title": "Current (mA)",
-                "labelFormatter": function (e) {
-                  return (e.value / 10) + 'A'
-                }
-              },
-              "toolTip": {
-                "contentFormatter": function (e) {
-                  var dataPoint = e.entries[0].dataPoint;
-                  return (dataPoint.y / 10) + 'A (' + _timeTickFormatter(dataPoint.x) + ')';
-                }
-              }
-            },
-            "chartSeriesTypes": [
-              {
-                "data": [
-                  {
-                    "name": "Current",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            }
-          ]
-          },
-          "gforce": {
-            "animationEnabled": true,
-            "title": {
-              "text": "G-Force"
-            },
-            "legend": {
-              "horizontalAlign": "center", // "center" , "right"
-              "verticalAlign": "bottom", // "top" , "bottom"
-              //            "fontSize": 15
-            },
-            "axisX": {
-              "title": "Time",
-              "labelFormatter": function (e) {
-                return _timeTickFormatter(e.value);
-              }
-            },
-            "axisY": {
-              "title": "Volts"
-            },
-            "axisY2": {
-              "title": "Capacity (mAh)",
-              "labelFormatter": function (e) {
-                return (e.value) + "mAh"
-              }
-            },
-            "toolTip": {
-              "contentFormatter": function (e) {
-                var entry = e.entries[0];
-                if (entry.dataSeries.axisYType === 'primary') {
-                  return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                } else {
-                  return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                }
-              }
-            },
-            "data": [
-              {
-                "showInLegend": true,
-                "name": "Voltage One",
-                "type": "line",
-                "dataPoints": []
-            },
-              {
-                "showInLegend": true,
-                "name": "Voltage Two",
-                "type": "line",
-                "dataPoints": []
-            },
-              {
-                "showInLegend": true,
-                "name": "Capacity One",
-                "type": "line",
-                "axisYType": "secondary",
-                "dataPoints": []
-            },
-              {
-                "showInLegend": true,
-                "name": "Capacity Two",
-                "type": "line",
-                "axisYType": "secondary",
-                "dataPoints": []
-            }
-          ]
-          },
-          "powerbox": {
-            "basic": {
-              "zoomEnabled": true,
-              "animationEnabled": true,
-              "title": {
-                "text": "PowerBox"
-              },
-              "legend": {
-                "horizontalAlign": "center", // "center" , "right"
-                "verticalAlign": "bottom", // "top" , "bottom"
-                //            "fontSize": 15
-              },
-              "axisX": {
-                "title": "Time",
-                "labelFormatter": function (e) {
-                  return _timeTickFormatter(e.value);
-                }
-              }
-            },
-            "chartSeriesTypes": [
-              {
-                "selected": true,
-                "axis": {
-                  "title": "Volts"
-                },
-                "tooltip": {
-                  "contentFormatter": function (e) {
-                    var entry = e.entries[0];
-                    return entry.dataPoint.y + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "Voltage One",
-                    "type": "line",
-                    "dataPoints": []
-                },
-                  {
-                    "showInLegend": true,
-                    "name": "Voltage Two",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            },
-              {
-                "selected": true,
-                "axis": {
-                  "title": "Capacity (mAh)",
-                  "labelFormatter": function (e) {
-                    return (e.value) + "mAh"
-                  }
-                },
-                "tooltip": {
-                  "contentFormatter": function (e) {
-                    var entry = e.entries[0];
-                    return entry.dataPoint.y + 'mAh (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "Capacity One",
-                    "type": "line",
-                    "dataPoints": []
-                },
-                  {
-                    "showInLegend": true,
-                    "name": "Capacity Two",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            }
-          ]
-          },
-          "rx": {
-            "basic": {
-              "animationEnabled": true,
-              "zoomEnabled": true,
-              "title": {
-                "text": "RX"
-              },
-              "legend": {
-                "horizontalAlign": "center", // "center" , "right"
-                "verticalAlign": "bottom", // "top" , "bottom"
-                //            "fontSize": 15
-              },
-              "axisX": {
-                "title": "Time",
-                "labelFormatter": function (e) {
-                  return _timeTickFormatter(e.value);
-                }
-              }
-            },
-            chartSeriesTypes: [
-              {
-                "selected": true,
-                "axis": {
-                  "title": "Signal"
-                },
-                "tooltip": {
-                  "contentFormatter": function (e) {
-                    return entry.dataPoint.y
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "A",
-                    "type": "line",
-                    "dataPoints": []
-                },
-                  {
-                    "showInLegend": true,
-                    "name": "B",
-                    "type": "line",
-                    "dataPoints": []
-                },
-                  {
-                    "showInLegend": true,
-                    "name": "L",
-                    "type": "line",
-                    "dataPoints": []
-                },
-                  {
-                    "showInLegend": true,
-                    "name": "R",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            },
-              {
-                "selected": true,
-                "axis": {
-                  "title": "Fades and Holds",
-                  "minimum": 0
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "Frame Loss",
-                    "axisYType": "secondary",
-                    "type": "line",
-                    "dataPoints": []
-                },
-                  {
-                    "showInLegend": true,
-                    "name": "Holds",
-                    "axisYType": "secondary",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            },
-              {
-                "selected": false,
-                "axis": {
-                  "title": "Volts",
-                  "labelFormatter": function (e) {
-                    return e.value / 100;
-                  },
-                  "minimum": 0
-                },
-                "toolTip": {
-                  "contentFormatter": function (e) {
-                    var entry = e.entries[0];
-                    return (entry.dataPoint.y / 100) + ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "RX Voltage",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            }
-          ]
-          },
-          "standard": {
-            "basic": {
-              "animationEnabled": true,
-              "zoomEnabled": true,
-              "title": {
-                "text": "RX"
-              },
-              "legend": {
-                "horizontalAlign": "center", // "center" , "right"
-                "verticalAlign": "bottom", // "top" , "bottom"
-                //            "fontSize": 15
-              },
-              "axisX": {
-                "title": "Time",
-                "labelFormatter": function (e) {
-                  return _timeTickFormatter(e.value);
-                }
-              }
-            },
-            "chartSeriesTypes": [
-              {
-                "selected": true,
-                "axis": {
-                  "title": "RPM",
-                  "labelFormatter": function (e) {
-                    return e.value;
-                  },
-                  "minimum": 0
-                },
-                "tooltip": {
-                  "contentFormatter": function (e) {
-                    var entry = e.entries[0];
-                    return entry.dataPoint.y + ' RPM (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "RPM",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            },
-              {
-                "selected": true,
-                "axis": {
-                  "title": "Temperature",
-                  "labelFormatter": function (e) {
-                    return e.value;
-                  },
-                  "minimum": -100
-                },
-                "tooltip": {
-                  "contentFormatter": function (e) {
-                    var entry = e.entries[0];
-                    return entry.dataPoint.y + ' degrees (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "Temperature",
-                    "type": "line",
-                    "dataPoints": []
-                }
-              ]
-            },
-              {
-                "selected": false,
-                "axis": {
-                  "title": "Volts",
-                  "labelFormatter": function (e) {
-                    return e.value / 100;
-                  },
-                  "minimum": 0
-                },
-                "tooltip": {
-                  "contentFormatter": function (e) {
-                    var entry = e.entries[0];
-                    return (entry.dataPoint.y / 100 )+ ' volts (' + _timeTickFormatter(entry.dataPoint.x) + ')';
-                  }
-                },
-                "data": [
-                  {
-                    "showInLegend": true,
-                    "name": "Voltage",
-                    "type": "line",
-                    "dataPoints": []
-                  }
-                ]
-              }
-          ]
-        },
-        "vario": {
-          "type": "serial",
-          "categoryField": "timestamp",
-          "startDuration": 1,
-          "startEffect": "easeOutSine",
-          "theme": "light",
-          "categoryAxis": {
-            "gridPosition": "start",
-            "labelFunction": function (value, serialDataItem, categoryAxis) {
-              return _timeTickFormatter(value);
-            }
-          },
-          "trendLines": [],
-          "graphs": [],
-          "legend": {
-            "useGraphSettings": true
-          },
-          "titles": [
-            {
-              "id": "Title-1",
-              "size": 15,
-              "text": "Vario"
-                  }
-              ],
-          "dataProvider": []
-        }
-      };
+                 "altitude": {
+                   "basic": {
+                     "zoomEnabled": true,
+                     "animationEnabled": true,
+                     "title": {
+                       "text": "Altitude"
+                     },
+                     "axisX": {
+                       "title": "Time",
+                       "labelFormatter": function (e) {
+                         return _timeTickFormatter(e.value);
+                       }
+                     },
+                     "axisY": {
+                       "title": "Altitude (meters)",
+                       "labelFormatter": function (e) {
+                         return (e.value / 10) + "m"
+                       }
+                     },
+                     "toolTip": {
+                       "contentFormatter": function (e) {
+                         var dataPoint = e.entries[0].dataPoint;
+                         return (dataPoint.y / 10) + "m (" + _timeTickFormatter(dataPoint.x) + ")";
+                       }
+                     }
+                   },
+                   "chartSeriesTypes": [
+                     {
+                       "data": [
+                         {
+                           "name": "Altitude",
+                           "type": "line",
+                         }
+                       ]
+                     }
+                   ]
+                 },
+                 "current": {
+                   "basic": {
+                     "zoomEnabled": true,
+                     "animationEnabled": true,
+                     "title": {
+                       "text": "Current"
+                     },
+                     "axisX": {
+                       "title": "Time",
+                       "labelFormatter": function (e) {
+                         return _timeTickFormatter(e.value);
+                       }
+                     },
+                     "axisY": {
+                       "title": "Current (mA)",
+                       "labelFormatter": function (e) {
+                         return (e.value / 10) + "A"
+                       }
+                     },
+                     "toolTip": {
+                       "contentFormatter": function (e) {
+                         var dataPoint = e.entries[0].dataPoint;
+                         return (dataPoint.y / 10) + "A (" + _timeTickFormatter(dataPoint.x) + ")";
+                       }
+                     }
+                   },
+                   "chartSeriesTypes": [
+                     {
+                       "data": [
+                         {
+                           "name": "Current",
+                           "type": "line",
+                         }
+                       ]
+                     }
+                   ]
+                 },
+                 "gforce": {
+                   "chartSeriesTypes": [
+                     {
+                       "data": [
+                         {
+                           "name": "X",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "data": [
+                         {
+                           "name": "Y",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "data": [
+                         {
+                           "name": "Z",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "data": [
+                         {
+                           "name": "Max X",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "data": [
+                         {
+                           "name": "Max Y",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "data": [
+                         {
+                           "name": "Max Z",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "data": [
+                         {
+                           "name": "Min Z",
+                           "type": "line"
+                         }
+                       ]
+                     }
+                   ]
+                 },
+                 "powerbox": {
+                   "basic": {
+                     "zoomEnabled": true,
+                     "animationEnabled": true,
+                     "title": {
+                       "text": "PowerBox"
+                     },
+                     "legend": {
+                       "horizontalAlign": "center", // "center" , "right"
+                       "verticalAlign": "bottom", // "top" , "bottom"
+                       //            "fontSize": 15
+                     },
+                     "axisX": {
+                       "title": "Time",
+                       "labelFormatter": function (e) {
+                         return _timeTickFormatter(e.value);
+                       }
+                     }
+                   },
+                   "chartSeriesTypes": [
+                     {
+                       "selected": true,
+                       "axis": {
+                         "title": "Volts"
+                       },
+                       "tooltip": {
+                         "contentFormatter": function (e) {
+                           var entry = e.entries[0];
+                           return entry.dataPoint.y + " volts (" + _timeTickFormatter(entry.dataPoint.x) + ")";
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "Voltage One",
+                           "type": "line"
+                         },
+                         {
+                           "showInLegend": true,
+                           "name": "Voltage Two",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "selected": true,
+                       "axis": {
+                         "title": "Capacity (mAh)",
+                         "labelFormatter": function (e) {
+                           return (e.value) + "mAh"
+                         }
+                       },
+                       "tooltip": {
+                         "contentFormatter": function (e) {
+                           var entry = e.entries[0];
+                           return entry.dataPoint.y + "mAh (" + _timeTickFormatter(entry.dataPoint.x) + ")";
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "Capacity One",
+                           "type": "line"
+                         },
+                         {
+                           "showInLegend": true,
+                           "name": "Capacity Two",
+                           "type": "line"
+                         }
+                       ]
+                     }
+                   ]
+                 },
+                 "rx": {
+                   "basic": {
+                     "animationEnabled": true,
+                     "zoomEnabled": true,
+                     "title": {
+                       "text": "RX"
+                     },
+                     "legend": {
+                       "horizontalAlign": "center", // "center" , "right"
+                       "verticalAlign": "bottom", // "top" , "bottom"
+                       //            "fontSize": 15
+                     },
+                     "axisX": {
+                       "title": "Time",
+                       "labelFormatter": function (e) {
+                         return _timeTickFormatter(e.value);
+                       }
+                     }
+                   },
+                   chartSeriesTypes: [
+                     {
+                       "selected": true,
+                       "axis": {
+                         "title": "Signal"
+                       },
+                       "tooltip": {
+                         "contentFormatter": function (e) {
+                           return entry.dataPoint.y
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "A",
+                           "type": "line"
+                       },
+                         {
+                           "showInLegend": true,
+                           "name": "B",
+                           "type": "line"
+                       },
+                         {
+                           "showInLegend": true,
+                           "name": "L",
+                           "type": "line"
+                       },
+                         {
+                           "showInLegend": true,
+                           "name": "R",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "selected": true,
+                       "axis": {
+                         "title": "Fades and Holds",
+                         "minimum": 0
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "Frame Loss",
+                           "axisYType": "secondary",
+                           "type": "line"
+                         },
+                         {
+                           "showInLegend": true,
+                           "name": "Holds",
+                           "axisYType": "secondary",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "selected": false,
+                       "axis": {
+                         "title": "Volts",
+                         "labelFormatter": function (e) {
+                           return e.value / 100;
+                         },
+                         "minimum": 0
+                       },
+                       "toolTip": {
+                         "contentFormatter": function (e) {
+                           var entry = e.entries[0];
+                           return (entry.dataPoint.y / 100) + " volts (" + _timeTickFormatter(entry.dataPoint.x) + ")";
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "RX Voltage",
+                           "type": "line"
+                         }
+                       ]
+                     }
+                   ]
+                 },
+                 "standard": {
+                   "basic": {
+                     "animationEnabled": true,
+                     "zoomEnabled": true,
+                     "title": {
+                       "text": "RX"
+                     },
+                     "legend": {
+                       "horizontalAlign": "center", // "center" , "right"
+                       "verticalAlign": "bottom", // "top" , "bottom"
+                       //            "fontSize": 15
+                     },
+                     "axisX": {
+                       "title": "Time",
+                       "labelFormatter": function (e) {
+                         return _timeTickFormatter(e.value);
+                       }
+                     }
+                   },
+                   "chartSeriesTypes": [
+                     {
+                       "selected": true,
+                       "axis": {
+                         "title": "RPM",
+                         "labelFormatter": function (e) {
+                           return e.value;
+                         },
+                         "minimum": 0
+                       },
+                       "tooltip": {
+                         "contentFormatter": function (e) {
+                           var entry = e.entries[0];
+                           return entry.dataPoint.y + " RPM (" + _timeTickFormatter(entry.dataPoint.x) + ")";
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "RPM",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "selected": true,
+                       "axis": {
+                         "title": "Temperature",
+                         "labelFormatter": function (e) {
+                           return e.value;
+                         },
+                         "minimum": -100
+                       },
+                       "tooltip": {
+                         "contentFormatter": function (e) {
+                           var entry = e.entries[0];
+                           return entry.dataPoint.y + " degrees (" + _timeTickFormatter(entry.dataPoint.x) + ")";
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "Temperature",
+                           "type": "line"
+                         }
+                       ]
+                     },
+                     {
+                       "selected": false,
+                       "axis": {
+                         "title": "Volts",
+                         "labelFormatter": function (e) {
+                           return e.value / 100;
+                         },
+                         "minimum": 0
+                       },
+                       "tooltip": {
+                         "contentFormatter": function (e) {
+                           var entry = e.entries[0];
+                           return (entry.dataPoint.y / 100 )+ " volts (" + _timeTickFormatter(entry.dataPoint.x) + ")";
+                         }
+                       },
+                       "data": [
+                         {
+                           "showInLegend": true,
+                           "name": "Voltage",
+                           "type": "line"
+                         }
+                       ]
+                     }
+                   ]
+                 },
+                 "vario": {
+
+                 }
+               };
     }
   }]);

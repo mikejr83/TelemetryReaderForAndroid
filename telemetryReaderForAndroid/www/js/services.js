@@ -8,10 +8,17 @@ angular.module('telemetryReaderForAndroid.services', [])
 
     this._setCurrentData = function (data) {
       this.file = data;
+
+      console.log('file', this.file);
+
       _.forEach(this.file.flights, function (flight, index) {
-
-
+        var chartDefinitions = chartDefinitionsService.getChartDefinitions();
+        _.forEach(flight, function(key) {
+          flight[key].basic = chartDefinitions.basic;
+        })
       });
+
+      console.log('file done', this.file);
     };
 
     var testOne = true;

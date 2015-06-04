@@ -34,358 +34,244 @@ public class Exporter {
 
     private static final String TAG = "TLMDecoder";
     private static final String JSONTemplate = "{\n" +
-            "          \"altitude\": {\n" +
-            "            \"basic\": {\n" +
-            "              \"zoomEnabled\": true,\n" +
-            "              \"animationEnabled\": true,\n" +
-            "              \"title\": {\n" +
-            "                \"text\": \"Altitude\"\n" +
-            "              },\n" +
-            "              \"axisX\": {\n" +
-            "                \"title\": \"Time\"\n" +
-            "              },\n" +
-            "              \"axisY\": {\n" +
-            "                \"title\": \"Altitude (meters)\"\n" +
-            "              },\n" +
-            "              \"toolTip\": {\n" +
-            "              }\n" +
-            "            },\n" +
-            "            \"chartSeriesTypes\": [\n" +
-            "              {\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"name\": \"Altitude\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "          },\n" +
-            "          \"current\": {\n" +
-            "            \"basic\": {\n" +
-            "              \"zoomEnabled\": true,\n" +
-            "              \"animationEnabled\": true,\n" +
-            "              \"title\": {\n" +
-            "                \"text\": \"Current\"\n" +
-            "              },\n" +
-            "              \"axisX\": {\n" +
-            "                \"title\": \"Time\"\n" +
-            "              },\n" +
-            "              \"axisY\": {\n" +
-            "                \"title\": \"Current (mA)\"\n" +
-            "              },\n" +
-            "              \"toolTip\": {\n" +
-            "              }\n" +
-            "            },\n" +
-            "            \"chartSeriesTypes\": [\n" +
-            "              {\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"name\": \"Current\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "          },\n" +
-            "          \"gforce\": {\n" +
-            "            \"animationEnabled\": true,\n" +
-            "            \"title\": {\n" +
-            "              \"text\": \"G-Force\"\n" +
-            "            },\n" +
-            "            \"legend\": {\n" +
-            "              \"horizontalAlign\": \"center\",\n" +
-            "              \"verticalAlign\": \"bottom\"\n" +
-            "            },\n" +
-            "            \"axisX\": {\n" +
-            "              \"title\": \"Time\"\n" +
-            "            },\n" +
-            "            \"axisY\": {\n" +
-            "              \"title\": \"Volts\"\n" +
-            "            },\n" +
-            "            \"axisY2\": {\n" +
-            "              \"title\": \"Capacity (mAh)\"\n" +
-            "            },\n" +
-            "            \"toolTip\": {\n" +
-            "            },\n" +
-            "            \"data\": [\n" +
-            "              {\n" +
-            "                \"showInLegend\": true,\n" +
-            "                \"name\": \"Voltage One\",\n" +
-            "                \"type\": \"line\",\n" +
-            "                \"dataPoints\": []\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"showInLegend\": true,\n" +
-            "                \"name\": \"Voltage Two\",\n" +
-            "                \"type\": \"line\",\n" +
-            "                \"dataPoints\": []\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"showInLegend\": true,\n" +
-            "                \"name\": \"Capacity One\",\n" +
-            "                \"type\": \"line\",\n" +
-            "                \"axisYType\": \"secondary\",\n" +
-            "                \"dataPoints\": []\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"showInLegend\": true,\n" +
-            "                \"name\": \"Capacity Two\",\n" +
-            "                \"type\": \"line\",\n" +
-            "                \"axisYType\": \"secondary\",\n" +
-            "                \"dataPoints\": []\n" +
-            "            }\n" +
-            "          ]\n" +
-            "          },\n" +
-            "          \"powerbox\": {\n" +
-            "            \"basic\": {\n" +
-            "              \"zoomEnabled\": true,\n" +
-            "              \"animationEnabled\": true,\n" +
-            "              \"title\": {\n" +
-            "                \"text\": \"PowerBox\"\n" +
-            "              },\n" +
-            "              \"legend\": {\n" +
-            "                \"horizontalAlign\": \"center\",\n" +
-            "                \"verticalAlign\": \"bottom\"\n" +
-            "              },\n" +
-            "              \"axisX\": {\n" +
-            "                \"title\": \"Time\"\n" +
-            "              }\n" +
-            "            },\n" +
-            "            \"chartSeriesTypes\": [\n" +
-            "              {\n" +
-            "                \"selected\": true,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Volts\"\n" +
-            "                },\n" +
-            "                \"tooltip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Voltage One\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                },\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Voltage Two\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"selected\": true,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Capacity (mAh)\"\n" +
-            "                },\n" +
-            "                \"tooltip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Capacity One\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                },\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Capacity Two\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "          },\n" +
-            "          \"rx\": {\n" +
-            "            \"basic\": {\n" +
-            "              \"animationEnabled\": true,\n" +
-            "              \"zoomEnabled\": true,\n" +
-            "              \"title\": {\n" +
-            "                \"text\": \"RX\"\n" +
-            "              },\n" +
-            "              \"legend\": {\n" +
-            "                \"horizontalAlign\": \"center\",\n" +
-            "                \"verticalAlign\": \"bottom\"\n" +
-            "              },\n" +
-            "              \"axisX\": {\n" +
-            "                \"title\": \"Time\"\n" +
-            "              }\n" +
-            "            },\n" +
-            "            \"chartSeriesTypes\": [\n" +
-            "              {\n" +
-            "                \"selected\": true,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Signal\"\n" +
-            "                },\n" +
-            "                \"tooltip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"A\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                },\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"B\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                },\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"L\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                },\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"R\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"selected\": true,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Fades and Holds\",\n" +
-            "                  \"minimum\": 0\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Frame Loss\",\n" +
-            "                    \"axisYType\": \"secondary\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                },\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Holds\",\n" +
-            "                    \"axisYType\": \"secondary\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"selected\": false,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Volts\",\n" +
-            "                  \"minimum\": 0\n" +
-            "                },\n" +
-            "                \"toolTip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"RX Voltage\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            }\n" +
-            "          ]\n" +
-            "          },\n" +
-            "          \"standard\": {\n" +
-            "            \"basic\": {\n" +
-            "              \"animationEnabled\": true,\n" +
-            "              \"zoomEnabled\": true,\n" +
-            "              \"title\": {\n" +
-            "                \"text\": \"RX\"\n" +
-            "              },\n" +
-            "              \"legend\": {\n" +
-            "                \"horizontalAlign\": \"center\",\n" +
-            "                \"verticalAlign\": \"bottom\"\n" +
-            "              },\n" +
-            "              \"axisX\": {\n" +
-            "                \"title\": \"Time\"\n" +
-            "              }\n" +
-            "            },\n" +
-            "            \"chartSeriesTypes\": [\n" +
-            "              {\n" +
-            "                \"selected\": true,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"RPM\",\n" +
-            "                  \"minimum\": 0\n" +
-            "                },\n" +
-            "                \"tooltip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"RPM\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"selected\": true,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Temperature\",\n" +
-            "                  \"minimum\": -100\n" +
-            "                },\n" +
-            "                \"tooltip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Temperature\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                }\n" +
-            "              ]\n" +
-            "            },\n" +
-            "              {\n" +
-            "                \"selected\": false,\n" +
-            "                \"axis\": {\n" +
-            "                  \"title\": \"Volts\",\n" +
-            "                  \"minimum\": 0\n" +
-            "                },\n" +
-            "                \"tooltip\": {\n" +
-            "                },\n" +
-            "                \"data\": [\n" +
-            "                  {\n" +
-            "                    \"showInLegend\": true,\n" +
-            "                    \"name\": \"Voltage\",\n" +
-            "                    \"type\": \"line\",\n" +
-            "                    \"dataPoints\": []\n" +
-            "                  }\n" +
-            "                ]\n" +
-            "              }\n" +
-            "          ]\n" +
-            "        },\n" +
-            "        \"vario\": {\n" +
-            "          \"type\": \"serial\",\n" +
-            "          \"categoryField\": \"timestamp\",\n" +
-            "          \"startDuration\": 1,\n" +
-            "          \"startEffect\": \"easeOutSine\",\n" +
-            "          \"theme\": \"light\",\n" +
-            "          \"categoryAxis\": {\n" +
-            "            \"gridPosition\": \"start\"\n" +
-            "          },\n" +
-            "          \"trendLines\": [],\n" +
-            "          \"graphs\": [],\n" +
-            "          \"legend\": {\n" +
-            "            \"useGraphSettings\": true\n" +
-            "          },\n" +
-            "          \"titles\": [\n" +
-            "            {\n" +
-            "              \"id\": \"Title-1\",\n" +
-            "              \"size\": 15,\n" +
-            "              \"text\": \"Vario\"\n" +
-            "                  }\n" +
-            "              ],\n" +
-            "          \"dataProvider\": []\n" +
-            "        }\n" +
-            "      }";
+"  \"altitude\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Altitude\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  },\n" +
+"  \"current\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Current\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  },\n" +
+"  \"gforce\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"X\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Y\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Z\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Max X\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Max Y\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Max Z\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"name\": \"Min Z\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  },\n" +
+"  \"powerbox\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Voltage One\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          },\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Voltage Two\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Capacity One\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          },\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Capacity Two\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  },\n" +
+"  \"rx\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"A\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          },\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"B\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          },\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"L\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          },\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"R\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Frame Loss\",\n" +
+"            \"axisYType\": \"secondary\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          },\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Holds\",\n" +
+"            \"axisYType\": \"secondary\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"RX Voltage\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  },\n" +
+"  \"standard\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"RPM\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Temperature\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      },\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"Voltage\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  },\n" +
+"  \"vario\": {\n" +
+"    \"chartSeriesTypes\": [\n" +
+"      {\n" +
+"        \"data\": [\n" +
+"          {\n" +
+"            \"showInLegend\": true,\n" +
+"            \"name\": \"RPM\",\n" +
+"            \"type\": \"line\",\n" +
+"            \"dataPoints\": []\n" +
+"          }\n" +
+"        ]\n" +
+"      }\n" +
+"    ]\n" +
+"  }\n" +
+"}";
 
     public Exporter(Uri uri, Iterable<Flight> flights) {
         this.flights = flights;
