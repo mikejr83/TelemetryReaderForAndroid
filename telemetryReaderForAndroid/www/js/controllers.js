@@ -124,18 +124,23 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         console.log("CanvasJSChartOptions - ready to go!", canvasJSChartOptions);
 
         $scope.chart = null;
-        $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
-        $scope.chart.render();
+        try {
+          $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
+          $scope.chart.render();
+        } catch (e) {
+          console.log("Error when trying to render the chart!", e);
+        }
 
         $ionicLoading.hide();
       };
 
       $scope.selectChanged = function (flight) {
         $ionicLoading.show();
-        $scope.service.setSelectedFlight(flight).then(function(decodedFlight) {
-          console.log('JSON String:', JSON.stringify(decodedFlight))
-          $scope.selectedFlightChanged();
-        });
+        window.setTimeout(function () {
+          $scope.service.setSelectedFlight(flight).then(function(decodedFlight) {
+            $scope.selectedFlightChanged();
+           });
+        }, 100);
       }
 
       $scope.seriesClicked = function (series) {

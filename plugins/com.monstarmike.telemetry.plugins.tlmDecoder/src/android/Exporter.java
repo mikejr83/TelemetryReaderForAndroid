@@ -1,9 +1,12 @@
 package com.monstarmike.telemetry.plugins;
 
 import android.net.Uri;
-import android.preference.PreferenceActivity;
 import android.util.Log;
 
+import org.joda.time.Duration;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +19,6 @@ import com.monstarmike.tlmreader.datablock.CurrentBlock;
 import com.monstarmike.tlmreader.datablock.DataBlock;
 import com.monstarmike.tlmreader.datablock.GForceBlock;
 import com.monstarmike.tlmreader.datablock.HeaderBlock;
-import com.monstarmike.tlmreader.datablock.HeaderDataBlock;
 import com.monstarmike.tlmreader.datablock.HeaderNameBlock;
 import com.monstarmike.tlmreader.datablock.PowerboxBlock;
 import com.monstarmike.tlmreader.datablock.RXBlock;
@@ -453,8 +455,21 @@ public class Exporter {
         JSONObject flightJO = new JSONObject();
         try {
             flightJO.put("_id", flight.hashCode());
-            flightJO.put("duration", flight.get_duration().getMillis());
-                Iterator<HeaderBlock> iterator = flight.get_headerBlocks();
+
+            Duration flightDuration = flight.get_duration();
+            Period period = flightDuration.toPeriod();
+            PeriodFormatter hms = new PeriodFormatterBuilder()
+                    .appendHours()
+                    .appendSeparator(":")
+                    .printZeroAlways()
+                    .appendMinutes()
+                    .appendSeparator(":")
+                    .appendSecondsWithMillis()
+                    .toFormatter();
+
+            flightJO.put("duration", hms.print(period));
+
+            Iterator<HeaderBlock> iterator = flight.get_headerBlocks();
             while(iterator.hasNext()) {
               HeaderBlock headerBlock = iterator.next();
               if (headerBlock instanceof HeaderNameBlock) {
@@ -499,7 +514,7 @@ public class Exporter {
                     }
                 } else if (b instanceof DataBlock) {
                     try {
-                        handleDataBlock(flightData, blockJSON, (DataBlock) b);
+                        handleDataBlock(flightData, (DataBlock) b);
                     } catch (JSONException e) {
                         Log.w(TAG, "JSON error when working with data block", e);
                     }
@@ -515,10 +530,10 @@ public class Exporter {
     }
 
     private JSONArray findDataPointsArray(JSONObject flightData, String sensorName,
-                                          int seriesPostion, int dataSetPosition) throws JSONException {
+                                          int seriesPosition, int dataSetPosition) throws JSONException {
         return flightData.getJSONObject(sensorName)
                 .getJSONArray("chartSeriesTypes")
-                .getJSONObject(seriesPostion)
+                .getJSONObject(seriesPosition)
                 .getJSONArray("data")
                 .getJSONObject(dataSetPosition)
                 .getJSONArray("dataPoints");
@@ -547,22 +562,28 @@ public class Exporter {
         }
     }
 
-    void handleDataBlock(JSONObject flightData, JSONObject jsonBlock, DataBlock dataBlock) throws JSONException {
-        jsonBlock.put("timestamp", dataBlock.get_timestamp());
-
+    void handleDataBlock(JSONObject flightData, DataBlock dataBlock) throws JSONException {
         if (dataBlock instanceof AirspeedBlock) {
 
         } else if (dataBlock instanceof AltitudeBlock) {
-            JSONArray dataPoints =this.findDataPointsArray(flightData, "altitude", 0, 0);
-
-            dataPoints.put(jsonBlock);
-            jsonBlock.put("altitude",
+            JSONObject jsonBlock = new JSONObject();
+            jsonBlock.put("x", dataBlock.get_timestamp());
+            jsonBlock.put("y",
                     ((AltitudeBlock) dataBlock).get_altitudeInTenthsOfAMeter());
-        } else if (dataBlock instanceof CurrentBlock) {
-            CurrentBlock currentBlock = (CurrentBlock) dataBlock;
-            jsonBlock.put("current", currentBlock.get_Current());
 
+            this.findDataPointsArray(flightData, "altitude", 0, 0).put(jsonBlock);
+        } else if (dataBlock instanceof CurrentBlock) {
+            JSONObject jsonBlock = new JSONObject();
+            jsonBlock.put("x", dataBlock.get_timestamp());
+
+            CurrentBlock currentBlock = (CurrentBlock) dataBlock;
+            jsonBlock.put("y", currentBlock.get_Current());
+
+            this.findDataPointsArray(flightData, "current", 0,0).put(jsonBlock);
         } else if (dataBlock instanceof GForceBlock) {
+            JSONObject jsonBlock = new JSONObject();
+            jsonBlock.put("x", dataBlock.get_timestamp());
+
             GForceBlock gfBlock = (GForceBlock) dataBlock;
             jsonBlock.put("maxX", gfBlock.get_maxX());
             jsonBlock.put("maxY", gfBlock.get_maxY());
@@ -573,42 +594,91 @@ public class Exporter {
             jsonBlock.put("minZ", gfBlock.get_minZ());
 
         } else if (dataBlock instanceof PowerboxBlock) {
-            PowerboxBlock pbBlock = (PowerboxBlock) dataBlock;
-            jsonBlock.put("capacityOne", pbBlock.get_capacityOne());
-            jsonBlock.put("capacityTwo", pbBlock.get_capacityTwo());
-            jsonBlock.put("voltageOne", pbBlock.get_voltageOne());
-            jsonBlock.put("voltageTwo", pbBlock.get_voltageTwo());
+            JSONObject v1Block = new JSONObject(),
+                v2Block = new JSONObject(),
+                cap1Block = new JSONObject(),
+                cap2Block = new JSONObject();
 
+            v1Block.put("x", dataBlock.get_timestamp());
+            v2Block.put("x", dataBlock.get_timestamp());
+            cap1Block.put("x", dataBlock.get_timestamp());
+            cap2Block.put("x", dataBlock.get_timestamp());
+
+            PowerboxBlock pbBlock = (PowerboxBlock) dataBlock;
+            cap1Block.put("y", pbBlock.get_capacityOne());
+            cap2Block.put("y", pbBlock.get_capacityTwo());
+            v1Block.put("y", pbBlock.get_voltageOne());
+            v2Block.put("y", pbBlock.get_voltageTwo());
+
+            this.findDataPointsArray(flightData, "powerbox", 0, 0).put(v1Block);
+            this.findDataPointsArray(flightData, "powerbox", 0, 1).put(v2Block);
+            this.findDataPointsArray(flightData, "powerbox", 1, 0).put(cap1Block);
+            this.findDataPointsArray(flightData, "powerbox", 1, 1).put(cap2Block);
         } else if (dataBlock instanceof RXBlock) {
             RXBlock rxBlock = (RXBlock) dataBlock;
 
-            jsonBlock.put("a", rxBlock.get_a());
-            jsonBlock.put("b", rxBlock.get_b());
-            jsonBlock.put("frameLoss", rxBlock.get_frameLoss());
-            jsonBlock.put("holds", rxBlock.get_holds());
-            jsonBlock.put("l", rxBlock.get_l());
-            jsonBlock.put("r", rxBlock.get_r());
-            jsonBlock.put("volts", rxBlock.get_volts());
+            JSONObject aBlock = new JSONObject(),
+                    bBlock = new JSONObject(),
+                    lBlock = new JSONObject(),
+                    rBlock = new JSONObject(),
+                    frameLossBlock = new JSONObject(),
+                    holdsBlock = new JSONObject(),
+                    voltsBlock = new JSONObject();
 
+            aBlock.put("x", dataBlock.get_timestamp());
+            bBlock.put("x", dataBlock.get_timestamp());
+            lBlock.put("x", dataBlock.get_timestamp());
+            rBlock.put("x", dataBlock.get_timestamp());
+            frameLossBlock.put("x", dataBlock.get_timestamp());
+            holdsBlock.put("x", dataBlock.get_timestamp());
+            voltsBlock.put("x", dataBlock.get_timestamp());
+
+            aBlock.put("y", rxBlock.get_a());
+            bBlock.put("y", rxBlock.get_b());
+            lBlock.put("y", rxBlock.get_l());
+            rBlock.put("y", rxBlock.get_r());
+
+            frameLossBlock.put("y", rxBlock.get_frameLoss());
+            holdsBlock.put("y", rxBlock.get_holds());
+
+            voltsBlock.put("y", rxBlock.get_volts());
+
+            this.findDataPointsArray(flightData, "rx", 0, 0).put(aBlock);
+            this.findDataPointsArray(flightData, "rx", 0, 1).put(bBlock);
+            this.findDataPointsArray(flightData, "rx", 0, 2).put(lBlock);
+            this.findDataPointsArray(flightData, "rx", 0, 3).put(rBlock);
+
+            this.findDataPointsArray(flightData, "rx", 0, 0).put(frameLossBlock);
+            this.findDataPointsArray(flightData, "rx", 1, 0).put(holdsBlock);
+
+            this.findDataPointsArray(flightData, "rx", 2, 0).put(voltsBlock);
         } else if (dataBlock instanceof StandardBlock) {
             StandardBlock standard = (StandardBlock) dataBlock;
 
-            jsonBlock.put("rpm", standard.get_rpm());
-            jsonBlock.put("temperature", standard.get_temperature());
-            jsonBlock.put("volt", standard.get_volt());
+            JSONObject rpmBlock = new JSONObject(),
+                    tempBlock = new JSONObject(),
+                    voltBlock = new JSONObject();
+
+            rpmBlock.put("x", dataBlock.get_timestamp());
+            tempBlock.put("x", dataBlock.get_timestamp());
+            voltBlock.put("x", dataBlock.get_timestamp());
+
+            rpmBlock.put("y", standard.get_rpm());
+            tempBlock.put("y", standard.get_temperature());
+            voltBlock.put("y", standard.get_volt());
 
         } else if (dataBlock instanceof VarioBlock) {
-            VarioBlock varioBlock = (VarioBlock) dataBlock;
-
+//            VarioBlock varioBlock = (VarioBlock) dataBlock;
+/*
             jsonBlock.put("delta1000ms", varioBlock.get_1000ms());
             jsonBlock.put("delta2000ms", varioBlock.get_2000ms());
             jsonBlock.put("delta250ms", varioBlock.get_250ms());
             jsonBlock.put("delta3000ms", varioBlock.get_3000ms());
             jsonBlock.put("delta500ms", varioBlock.get_500ms());
-            jsonBlock.put("altitude", varioBlock.get_altitude());
+            jsonBlock.put("altitude", varioBlock.get_altitude());*/
 
         } else if (dataBlock instanceof VoltageBlock) {
-            VoltageBlock voltageBlock = (VoltageBlock) dataBlock;
+//            VoltageBlock voltageBlock = (VoltageBlock) dataBlock;
 
 //			jsonBlock.put("delta3000ms", voltageBlock.g);
 //			jsonBlock.put("delta500ms", varioBlock.get_500ms());
