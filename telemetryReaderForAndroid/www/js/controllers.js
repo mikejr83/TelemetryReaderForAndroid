@@ -136,12 +136,18 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
 
       $scope.selectChanged = function (flight) {
         $ionicLoading.show();
-        window.setTimeout(function () {
-          $scope.service.setSelectedFlight(flight).then(function(decodedFlight) {
-            $scope.selectedFlightChanged();
-           });
-        }, 100);
-      }
+
+        if ($scope.service.selectedFlight['_cached'] === undefined
+        || !$scope.service.selectedFlight['_cached']) {
+          window.setTimeout(function () {
+            $scope.service.setSelectedFlight($scope.service.selectedFlight).then(function(decodedFlight) {
+              $scope.selectedFlightChanged();
+             });
+          }, 100);
+        } else {
+          $scope.selectedFlightChanged();
+        }
+      };
 
       $scope.seriesClicked = function (series) {
 

@@ -12,13 +12,47 @@ angular.module('telemetryReaderForAndroid.services', [])
       console.log('file', this.file);
 
       _.forEach(this.file.flights, function (flight, index) {
-        var chartDefinitions = chartDefinitionsService.getChartDefinitions();
-        _.forEach(flight, function(key) {
-          flight[key].basic = chartDefinitions.basic;
-        })
+
       });
 
       console.log('file done', this.file);
+    };
+
+    this._setCurrentFlight = function(flight) {
+      var chartDefinitions = chartDefinitionsService.getChartDefinitions();
+      for (var sensorType in chartDefinitions) {
+        if (chartDefinitions.hasOwnProperty(sensorType)) {
+          if (flight.flightData[sensorType] === undefined) {
+            console.warn('Flight doesn\'t have:', sensorType);
+            flight.flightData[sensorType] = chartDefinitions[sensorType];
+          } else {
+            flight.flightData[sensorType].basic = chartDefinitions[sensorType].basic;
+            _.forEach(chartDefinitions[sensorType].chartSeriesTypes, function (baseSeries, index) {
+              var series = flight.flightData[sensorType].chartSeriesTypes[index];
+              if (!series) {
+                console.warn('base series not found for sensor: ' + sensorType + ' - ' + index);
+              }
+              series.selected = baseSeries.selected
+              series.axis = baseSeries.axis;
+              series.tooltip = baseSeries.tooltip
+            });
+          }
+        }
+      }
+
+      this.selectedFlight = flight;
+
+      var flightIndex = -1;
+      _.forEach(this.file.flights, function (cachedFlight, index) {
+        if (cachedFlight['_id'] == flight['_id']) {
+          flightIndex = index;
+          flight['_cached'] = true;
+        }
+      });
+
+      if (flightIndex > -1) {
+        this.file.flights[flightIndex] = flight;
+      }
     };
 
     var testOne = true;
@@ -98,7 +132,7 @@ angular.module('telemetryReaderForAndroid.services', [])
           && window.com.monstarmike.telemetry.plugins.tlmDecoder 
           && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
         window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file, flight, function (decodedFlight) {
-          that.selectedFlight = decodedFlight;
+          that._setCurrentFlight(decodedFlight);
           deferred.resolve(that.selectedFlight);
         }, function (error) {
           console.error("error during decoding of flight.", error);

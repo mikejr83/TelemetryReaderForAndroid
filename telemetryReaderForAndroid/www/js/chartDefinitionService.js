@@ -1,9 +1,9 @@
 angular.module('telemetryReaderForAndroid.services')
 
   .service('chartDefinitionsService', [function () {
-      this.getChartDefinitions = function (offset, useMetric) {
+      this.getChartDefinitions = function (useMetric) {
         var _timeTickFormatter = function (x) {
-          var durationObj = moment.duration(x * 10 - offset);
+          var durationObj = moment.duration(x * 10);
           var durationStr = '';
 
           if (durationObj.hours() > 0) durationStr = durationObj.hours() + ':';
