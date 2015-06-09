@@ -1,4 +1,4 @@
-cordova.define("com.monstarmike.telemetry.plugins.tlmDecoder", function(require, exports, module) { var argscheck = require('cordova/argscheck'),
+var argscheck = require('cordova/argscheck'),
   utils = require('cordova/utils'),
   exec = require('cordova/exec');
 
@@ -37,5 +37,3 @@ TelemetryDecoder.decodeFlight = function(file, flight, pass, fail) {
 };
 
 module.exports = TelemetryDecoder;
-
-});
