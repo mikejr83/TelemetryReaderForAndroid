@@ -32,17 +32,14 @@ public class ExportService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
         if (action.equalsIgnoreCase("readflight")) {
-            JSONObject file = null;
-            try {
-                file = new JSONObject(intent.getStringExtra("file"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            JSONObject file = ServiceDataTransfer.getInstance().get_file();
+            JSONObject flightJO = ServiceDataTransfer.getInstance().get_flight();
+            
+            if (file == null) {
+              Log.w(TAG, "The file object pulled from the ServiceDataTransfer singleton was null!");
             }
-            JSONObject flightJO = null;
-            try {
-                flightJO = new JSONObject(intent.getStringExtra("flight"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            if (flightJO == null) {
+              Log.w(TAG, "The flight object pulled from the ServiceDataTransfer singleton was null!");
             }
 
             JSONObject decodedFlight = null;
@@ -51,36 +48,15 @@ public class ExportService extends IntentService {
             } catch (Exception e) {
                 Log.e(TAG, "Error occurred decoding the flight!", e);
             }
-
-            File outputDir = this.getApplicationContext().getCacheDir();
-            File outputFile = null;
-            try {
-                outputFile = File.createTempFile("flight_export", "json", outputDir);
-            } catch (IOException e) {
-                e.printStackTrace();
+            
+            if (decodedFlight == null) {
+              Log.w(TAG, "The decoded flight was null. This could be seriously not good!");
             }
 
-            if (outputFile != null) {
-                try {
-                    FileOutputStream outputStream = new FileOutputStream(outputFile);
-                    outputStream.write(decodedFlight.toString().getBytes());
-                } catch (FileNotFoundException e) {
-                    Log.e(TAG, "Couldn't find the temporary file!", e);
-                } catch (IOException e) {
-                    Log.e(TAG, "There was an IO exception!", e);
-                }
-            }
+            ServiceDataTransfer.getInstance().set_flight(decodedFlight);
 
-            String tempPath = null;
-
-            if (outputFile != null) {
-                tempPath = outputFile.getPath();
-            }
-
-            Log.d(TAG, "Output path: " + tempPath);
-
-            Intent localIntent = new Intent(Constants.READ_FLIGHT_BROADCAST_ACTION)
-                    .putExtra(Constants.READ_FLIGHT_EXTENDED_STATUS, tempPath);
+            Intent localIntent = new Intent(Constants.READ_FLIGHT_BROADCAST_ACTION);
+                    //.putExtra(Constants.READ_FLIGHT_EXTENDED_STATUS, tempPath);
             LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
         }
     }

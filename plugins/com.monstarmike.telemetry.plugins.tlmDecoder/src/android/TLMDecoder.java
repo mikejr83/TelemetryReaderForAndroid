@@ -73,11 +73,15 @@ public class TLMDecoder extends CordovaPlugin {
             Log.d(TAG, "Setting the data to: " + file.getString("uri"));
             exportServiceIntent.setData(Uri.parse(file.getString("uri")));
 
-            exportServiceIntent.putExtra("file", file.toString());
-            exportServiceIntent.putExtra("flight", flightJO.toString());
+            /* exportServiceIntent.putExtra("file", file.toString());
+            exportServiceIntent.putExtra("flight", flightJO.toString()); */
+            
+            ServiceDataTransfer.getInstance().set_file(file);
+            ServiceDataTransfer.getInstance().set_flight(flightJO);
+            ServiceDataTransfer.getInstance().set_callbackContext(callbackContext);
+            
             exportServiceIntent.setAction("readFlight");
 
-            this.exportResponseReceiver.set_callbackContext(callbackContext);
             this.cordova.getActivity().startService(exportServiceIntent);
         }
 
@@ -119,20 +123,17 @@ public class TLMDecoder extends CordovaPlugin {
     }
 
     private class ExportResponseReceiver extends BroadcastReceiver {
-        private CallbackContext callbackContext = null;
-
-        public void set_callbackContext(CallbackContext callbackContext) {
-            this.callbackContext = callbackContext;
-        }
-
+      
         private ExportResponseReceiver() {
             super();
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (this.callbackContext != null) {
-                String flightTempFilePath = intent.getStringExtra(Constants.READ_FLIGHT_EXTENDED_STATUS);
+            CallbackContext callbackContext = ServiceDataTransfer.getInstance().get_callbackContext();
+            if (callbackContext != null) {
+                
+                /* String flightTempFilePath = intent.getStringExtra(Constants.READ_FLIGHT_EXTENDED_STATUS);
                 FileInputStream inputStream = null;
                 try {
                     inputStream = new FileInputStream(new File(flightTempFilePath));
@@ -163,17 +164,21 @@ public class TLMDecoder extends CordovaPlugin {
                 File tempFile = new File(flightTempFilePath);
                 if (tempFile.exists()) {
                     tempFile.delete();
-                }
-
-                if (flightString != null) {
-                    try {
-                        this.callbackContext.success(new JSONObject(flightString));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                } */
+                JSONObject flight = ServiceDataTransfer.getInstance().get_flight();
+                
+                ServiceDataTransfer.getInstance().resetData();
+                
+                if (flight != null) {
+                    Log.d(TAG, "Calling back to the client with a flight JSON object which was retrieved from the export service.");
+                    callbackContext.success(flight);
                 } else {
-                    this.callbackContext.error("Did not get a flight back from the service.");
+                    Log.w(TAG, "No flight was handed back. This could be an error in the service!");
+                    callbackContext.error("Did not get a flight back from the service.");
                 }
+            } else {
+              Log.w(TAG, "Cannot callback to the client because there was no callback context!");
+              ServiceDataTransfer.getInstance().resetData();
             }
         }
     }
