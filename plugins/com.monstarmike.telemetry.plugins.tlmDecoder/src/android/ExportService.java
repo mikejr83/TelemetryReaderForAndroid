@@ -32,11 +32,11 @@ public class ExportService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
         if (action.equalsIgnoreCase("readflight")) {
-            JSONObject file = ServiceDataTransfer.getInstance().get_file();
+            Uri fileUri = ServiceDataTransfer.getInstance().get_fileUri();
             JSONObject flightJO = ServiceDataTransfer.getInstance().get_flight();
             
-            if (file == null) {
-              Log.w(TAG, "The file object pulled from the ServiceDataTransfer singleton was null!");
+            if (fileUri == null) {
+              Log.w(TAG, "The file Uri pulled from the ServiceDataTransfer singleton was null!");
             }
             if (flightJO == null) {
               Log.w(TAG, "The flight object pulled from the ServiceDataTransfer singleton was null!");
@@ -44,7 +44,7 @@ public class ExportService extends IntentService {
 
             JSONObject decodedFlight = null;
             try {
-                decodedFlight = this.buildFlight(file, flightJO);
+                decodedFlight = this.buildFlight(fileUri, flightJO);
             } catch (Exception e) {
                 Log.e(TAG, "Error occurred decoding the flight!", e);
             }
@@ -61,13 +61,7 @@ public class ExportService extends IntentService {
         }
     }
 
-    private JSONObject buildFlight(JSONObject file, JSONObject flightJO) {
-        Uri uri = null;
-        try {
-            uri = Uri.parse(file.getString("uri"));
-        } catch (JSONException e) {
-            Log.w(TAG, "Unable to get the uri from the file JSONObject", e);
-        }
+    private JSONObject buildFlight(Uri uri, JSONObject flightJO) {
 
         if (uri == null) {
             Log.w(TAG, "Returning the default flight object that was passed in.");

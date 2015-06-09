@@ -1,5 +1,7 @@
 package com.monstarmike.telemetry.plugins;
 
+import android.net.Uri;
+
 import org.apache.cordova.CallbackContext;
 import org.json.JSONObject;
 
@@ -15,7 +17,7 @@ public class ServiceDataTransfer {
   }
   
   private JSONObject flight;
-  private JSONObject file;
+  private Uri fileUri;
   private CallbackContext callbackContext;
   
   public JSONObject get_flight() {
@@ -26,12 +28,12 @@ public class ServiceDataTransfer {
     this.flight = flight;
   }
   
-  public JSONObject get_file() {
-    return this.file;
+  public Uri get_fileUri() {
+    return this.fileUri;
   }
   
-  public void set_file(JSONObject file) {
-    this.file = file;
+  public void set_fileUri(Uri fileUri) {
+    this.fileUri = fileUri;
   }
   
   public CallbackContext get_callbackContext () {
@@ -46,7 +48,7 @@ public class ServiceDataTransfer {
   
   public void resetData () {
     this.flight = null;
-    this.file = null;
+    this.fileUri = null;
     this.callbackContext = null;
   }
 }

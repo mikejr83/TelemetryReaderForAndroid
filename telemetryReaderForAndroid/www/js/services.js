@@ -130,8 +130,9 @@ angular.module('telemetryReaderForAndroid.services', [])
           && window.com.monstarmike.telemetry 
           && window.com.monstarmike.telemetry.plugins 
           && window.com.monstarmike.telemetry.plugins.tlmDecoder 
-          && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
-        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file, flight, function (decodedFlight) {
+          && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight) {
+        console.log("Sending uri: ", this.file.uri);
+        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file.uri, flight, function (decodedFlight) {
           that._setCurrentFlight(decodedFlight);
           deferred.resolve(that.selectedFlight);
         }, function (error) {

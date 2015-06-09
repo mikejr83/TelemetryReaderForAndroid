@@ -56,11 +56,11 @@ public class TLMDecoder extends CordovaPlugin {
             intent.setType("*/*");
             super.cordova.startActivityForResult(this, intent, 9988);
         } else if (action.equalsIgnoreCase("readFlight")) {
-            JSONObject file = args.getJSONObject(0);
+            String fileUriStr = args.getString(0);
             JSONObject flightJO = args.getJSONObject(1);
 
-            if (file != null) {
-                Log.d(TAG, "file: " + file.toString());
+            if (fileUriStr != null) {
+                Log.d(TAG, "file uri: " + fileUriStr);
             } else {
                 Log.w(TAG, "File was passed in null. This probably won't end well!");
             }
@@ -70,13 +70,14 @@ public class TLMDecoder extends CordovaPlugin {
 
             Log.d(TAG, "creating the export service intent");
             Intent exportServiceIntent = new Intent(this.cordova.getActivity(), ExportService.class);
-            Log.d(TAG, "Setting the data to: " + file.getString("uri"));
-            exportServiceIntent.setData(Uri.parse(file.getString("uri")));
+            Log.d(TAG, "Setting the data to: " + fileUriStr);
+            Uri fileUri = Uri.parse(fileUriStr);
+            exportServiceIntent.setData(fileUri);
 
             /* exportServiceIntent.putExtra("file", file.toString());
             exportServiceIntent.putExtra("flight", flightJO.toString()); */
             
-            ServiceDataTransfer.getInstance().set_file(file);
+            ServiceDataTransfer.getInstance().set_fileUri(fileUri);
             ServiceDataTransfer.getInstance().set_flight(flightJO);
             ServiceDataTransfer.getInstance().set_callbackContext(callbackContext);
             
