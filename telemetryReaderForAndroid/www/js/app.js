@@ -38,6 +38,15 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
         }
       }
     })
+  .state('app.fileInfo', {
+      url: "/fileInfo",
+      views: {
+        'menuContent': {
+          templateUrl: "templates/fileInfo.html",
+          controller: "FileInfoController"
+        }
+      }
+    })
     .state('app.welcome', {
       url: "/welcome",
       views: {

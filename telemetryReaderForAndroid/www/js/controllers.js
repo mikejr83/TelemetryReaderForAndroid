@@ -1,17 +1,23 @@
 angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndroid.services'])
 
-  .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', '$window', 'dataService',
-                          function ($scope, $ionicModal, $timeout, $window, dataService) {
+  .controller('AppCtrl', ['$scope', '$ionicModal', '$ionicLoading', '$timeout', '$window', '$state', 'dataService',
+                          function ($scope, $ionicModal, $ionicLoading, $timeout, $window, $state, dataService) {
       $scope.doGetDataFile = function () {
+        $ionicLoading.show();
+        
         console.log('get data file');
 
         dataService.loadData(true).then(function (data) {
-          if (dataService.flgiths && dataService.flights.length > 0) {
-            dataService.selectedFlight = dataService.flights[0];
+          dataService.file = data;
+          if (dataService.file && dataService.file.flights && dataService.file.flights.length > 0) {
+            dataService.setSelectedFlight(dataService.file.flights[0]).then(function () {
+              console.log('here');
+              window.location = "#/app/fileInfo";
+            });
           } else {
             dataService.selectedFlight = null;
+            window.location = "#/app/fileInfo";
           }
-
         });
       };
 
@@ -42,6 +48,9 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
             } else {
               $ionicLoading.hide();
             }
+          }, function (error) {
+            $ionicLoading.hide();
+            window.location = '#/app/welcome';
           });
         } else {
           $scope.chart = null;
@@ -164,4 +173,11 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
       $scope.$watch('service.selectedKey', function () {
         $scope.selectedFlightChanged();
       });
+}])
+  .controller('FileInfoController', ['$scope', '$ionicLoading', 'dataService', function($scope, $ionicLoading, dataService) {
+    $scope.service = dataService;
+    
+    $scope.$on('$ionicView.enter', function () {
+      $ionicLoading.hide();
+    });
 }]);

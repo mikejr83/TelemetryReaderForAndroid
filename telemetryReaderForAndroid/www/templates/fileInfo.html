@@ -1,0 +1,9 @@
+<ion-view view-title="File Info">
+  <ion-content>
+    <ion-list>
+  <ion-item ng-repeat="flight in service.file.flights">
+    {{$index + 1}}. Flight: {{flight.duration}}
+  </ion-item>
+</ion-list>
+  </ion-content>
+</ion-view>
