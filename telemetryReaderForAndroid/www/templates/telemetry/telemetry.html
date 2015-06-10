@@ -1,20 +1,32 @@
 <ion-view view-title="{{service.selectedTitle}}">
   
   <ion-content>
-      <select ng-model="service.selectedFlight" ng-options="flight as flight.duration for flight in service.file.flights" ng-change="selectChanged(selectedFlight)"></select>
-    
-    <div ng-show="chartDataOptions.chartSeriesTypes.length > 2">
-      <label ng-repeat="series in chartDataOptions.chartSeriesTypes">
-        <input type="checkbox"
-               value="{{series.axis.title}}"
-               ng-model="series.selected"
-               ng-click="seriesClicked(series)"> {{series.axis.title}}
+    <div class="list">
+      <label class="item item-input item-select">
+        <div class="input-label">Current Flight</div>
+        <select ng-model="service.selectedFlight" ng-options="flight as (flight._id + 1) + '. ' + flight.duration for flight in service.file.flights" ng-change="selectChanged(selectedFlight)"></select>
       </label>
-      <!--<span ng-repeat="series in chartDataOptions.chartSeriesTypes">{{series.axis.title}}</span>-->
     </div>
-      
+    
     <div class="grid-container">
         <figure id="myChart"></figure>
+    </div>
+    
+    <div ng-show="chartDataOptions.chartSeriesTypes.length > 2">
+      <ul class="list">
+        <li class="item item-toggle" ng-repeat="series in chartDataOptions.chartSeriesTypes">
+          {{series.axis.title}}
+          <label class="toggle">
+            <input type="checkbox"
+               value="{{series.axis.title}}"
+               ng-model="series.selected"
+               ng-click="seriesClicked(series)"> 
+            <div class="track">
+              <div class="handle"></div>
+            </div>
+          </label>
+        </li>
+      </ul>
     </div>
   </ion-content>
 </ion-view>
