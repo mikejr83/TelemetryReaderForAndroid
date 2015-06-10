@@ -21,7 +21,11 @@
     "..\\plugins\\com.monstarmike.telemetry.plugins",
     "org.apache.cordova.inappbrowser",
     "cordova-plugin-android-support-v4",
-    "..\\plugins\\com.monstarmike.telemetry.plugins.tlmDecoder"
+    "..\\plugins\\com.monstarmike.telemetry.plugins.tlmDecoder",
+    {
+      "locator": "../plugins/com.monstarmike.telemetry.plugins.tlmDecoder",
+      "id": "com.monstarmike.telemetry.plugins"
+    }
   ],
   "cordovaPlatforms": [
     "android"

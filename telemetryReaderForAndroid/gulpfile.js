@@ -1,3 +1,4 @@
+var child_process = require('child_process');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var bower = require('bower');
@@ -29,6 +30,11 @@ gulp.task('sass', function(done) {
 
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
+});
+
+gulp.task('telemetryplugin', function () {
+  child_process.execSync('ionic plugin rm com.monstarmike.telemetry.plugins');
+  child_process.execSync('ionic plugin add ../plugins/com.monstarmike.telemetry.plugins.tlmDecoder');
 });
 
 gulp.task('install', ['git-check'], function() {

@@ -9,12 +9,9 @@ import android.util.Log;
 import com.google.common.io.ByteStreams;
 import com.monstarmike.tlmreader.TLMReader;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -31,15 +28,17 @@ public class ExportService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
-        if (action.equalsIgnoreCase("readflight")) {
+
+        Log.d(TAG, "Export Service action: " + action);
+        if (action.equalsIgnoreCase(Constants.ExportServiceActions.READ_FLIGHT)) {
             Uri fileUri = ServiceDataTransfer.getInstance().get_fileUri();
             JSONObject flightJO = ServiceDataTransfer.getInstance().get_flight();
-            
+
             if (fileUri == null) {
-              Log.w(TAG, "The file Uri pulled from the ServiceDataTransfer singleton was null!");
+                Log.w(TAG, "The file Uri pulled from the ServiceDataTransfer singleton was null!");
             }
             if (flightJO == null) {
-              Log.w(TAG, "The flight object pulled from the ServiceDataTransfer singleton was null!");
+                Log.w(TAG, "The flight object pulled from the ServiceDataTransfer singleton was null!");
             }
 
             JSONObject decodedFlight = null;
@@ -48,15 +47,35 @@ public class ExportService extends IntentService {
             } catch (Exception e) {
                 Log.e(TAG, "Error occurred decoding the flight!", e);
             }
-            
+
             if (decodedFlight == null) {
-              Log.w(TAG, "The decoded flight was null. This could be seriously not good!");
+                Log.w(TAG, "The decoded flight was null. This could be seriously not good!");
             }
 
             ServiceDataTransfer.getInstance().set_flight(decodedFlight);
 
             Intent localIntent = new Intent(Constants.READ_FLIGHT_BROADCAST_ACTION);
-                    //.putExtra(Constants.READ_FLIGHT_EXTENDED_STATUS, tempPath);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+        } else if (action.equalsIgnoreCase(Constants.ExportServiceActions.READ_FILE)) {
+            Uri uri = intent.getData();
+
+            Log.d(TAG, "Reading file: " + uri.toString());
+
+            JSONObject file = null;
+
+            try {
+                file = this.parseFile(uri);
+            } catch (IOException e) {
+                Log.e(TAG, "IO error when trying to get and parse the TLM data file.", e);
+            }
+
+            if (file == null) {
+                Log.w(TAG, "This is interesting. The file JSONObject from the parse function is null!");
+            }
+
+            Log.d(TAG, "Done with the file. Broadcasting a local intent.");
+            ServiceDataTransfer.getInstance().set_file(file);
+            Intent localIntent = new Intent(Constants.READ_FILE_BROADCAST_ACTION);
             LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
         }
     }
@@ -99,5 +118,25 @@ public class ExportService extends IntentService {
 
         Exporter exporter = new Exporter(uri, reader);
         return exporter.exportFlightData(flightJO);
+    }
+
+    private JSONObject parseFile(Uri uri) throws IOException {
+        InputStream inputStream = this.getApplicationContext().getContentResolver().openInputStream(uri);
+        Log.d(TAG, "Have an input stream.");
+        byte[] bytes = ByteStreams.toByteArray(inputStream);
+        Log.d(TAG, "Read bytes: " + bytes.length);
+
+        TLMReader reader = new TLMReader();
+
+        reader.Read(bytes);
+
+        Log.d(TAG, "The reader has read all the bytes. Going to export.");
+
+        Exporter exporter = new Exporter(uri, reader);
+
+        JSONObject file = exporter.exportFlights();
+
+
+        return file;
     }
 }

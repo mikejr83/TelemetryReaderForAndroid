@@ -19,9 +19,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,11 +35,11 @@ public class TLMDecoder extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        IntentFilter exportStatusFilter = new IntentFilter(Constants.READ_FLIGHT_BROADCAST_ACTION);
-
         this.exportResponseReceiver = new ExportResponseReceiver();
         LocalBroadcastManager.getInstance(cordova.getActivity())
-                .registerReceiver(this.exportResponseReceiver, exportStatusFilter);
+                .registerReceiver(this.exportResponseReceiver, new IntentFilter(Constants.READ_FLIGHT_BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(cordova.getActivity())
+                .registerReceiver(this.exportResponseReceiver, new IntentFilter(Constants.READ_FILE_BROADCAST_ACTION));
     }
 
     @Override
@@ -74,14 +71,11 @@ public class TLMDecoder extends CordovaPlugin {
             Uri fileUri = Uri.parse(fileUriStr);
             exportServiceIntent.setData(fileUri);
 
-            /* exportServiceIntent.putExtra("file", file.toString());
-            exportServiceIntent.putExtra("flight", flightJO.toString()); */
-            
             ServiceDataTransfer.getInstance().set_fileUri(fileUri);
             ServiceDataTransfer.getInstance().set_flight(flightJO);
             ServiceDataTransfer.getInstance().set_callbackContext(callbackContext);
-            
-            exportServiceIntent.setAction("readFlight");
+
+            exportServiceIntent.setAction(Constants.ExportServiceActions.READ_FLIGHT);
 
             this.cordova.getActivity().startService(exportServiceIntent);
         }
@@ -93,83 +87,77 @@ public class TLMDecoder extends CordovaPlugin {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         Log.i(TAG, "TLMDecoder onActivityResult requestCode: " + requestCode + " - resultCode: " + resultCode);
 
-        if (requestCode == 9988) {
-            try {
-                Uri fileUri = Uri.parse(intent.getDataString());
+        if(intent == null) {
+            Log.w(TAG, "When in onActivityResult the intent was null.");
+            this.callbackContext.error(-1);
+        }
+        else if (requestCode == 9988) {
+            String intentData = intent.getDataString();
+            Log.d(TAG, "Intent Data String: " + intentData);
+            if (intentData != null && !intentData.equalsIgnoreCase("")) {
+                Uri fileUri = Uri.parse(intentData);
                 Log.d(TAG, "File URI: " + fileUri.toString());
-                this.parseFile(fileUri);
-            } catch (IOException e) {
-                Log.e(TAG, "Error when parsing the file!", e);
-                e.printStackTrace();
+                Intent exportServiceIntent = new Intent(this.cordova.getActivity(), ExportService.class);
+                exportServiceIntent.setData(fileUri);
+
+                ServiceDataTransfer.getInstance().set_fileUri(fileUri);
+                ServiceDataTransfer.getInstance().set_callbackContext(callbackContext);
+
+                exportServiceIntent.setAction(Constants.ExportServiceActions.READ_FILE);
+
+                this.cordova.getActivity().startService(exportServiceIntent);
+            } else {
+                this.callbackContext.error(-1);
             }
         }
 
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
-    void parseFile(Uri uri) throws IOException {
-        InputStream inputStream = super.cordova.getActivity().getContentResolver().openInputStream(uri);
-        byte[] bytes = ByteStreams.toByteArray(inputStream);
-
-        TLMReader reader = new TLMReader();
-
-        reader.Read(bytes);
-
-        Exporter exporter = new Exporter(uri, reader);
-
-        if (this.callbackContext != null) {
-            Log.d(TAG, "There is a callback context. Lets send the array back!");
-            this.callbackContext.success(exporter.exportFlights());
-        }
-    }
-
     private class ExportResponseReceiver extends BroadcastReceiver {
-      
+
         private ExportResponseReceiver() {
             super();
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "In the broadcast receiver onRecieve.");
+
             CallbackContext callbackContext = ServiceDataTransfer.getInstance().get_callbackContext();
+            String action = intent.getAction();
+
+            Log.d(TAG, "OnReceive action: " + action);
+
+            if (action.equalsIgnoreCase(Constants.READ_FILE_BROADCAST_ACTION)) {
+                this.handleReadFile(callbackContext);
+            } else if (action.equalsIgnoreCase(Constants.READ_FLIGHT_BROADCAST_ACTION)) {
+                this.handleReadFlight(callbackContext);
+            }
+
+            ServiceDataTransfer.getInstance().resetData();
+        }
+
+        private void handleReadFile(CallbackContext callbackContext) {
             if (callbackContext != null) {
-                
-                /* String flightTempFilePath = intent.getStringExtra(Constants.READ_FLIGHT_EXTENDED_STATUS);
-                FileInputStream inputStream = null;
-                try {
-                    inputStream = new FileInputStream(new File(flightTempFilePath));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                JSONObject file = ServiceDataTransfer.getInstance().get_file();
+
+                if (file != null) {
+                    Log.d(TAG, "Calling back to the client with a file JSON object which was retrieved from the export service.");
+                    callbackContext.success(file);
+                } else {
+                    Log.w(TAG, "No file JSON was handed back. This could be an error in the service!");
+                    callbackContext.error("Did not get file JSON back from the service.");
                 }
+            } else {
+                Log.w(TAG, "Cannot callback to the client because there was no callback context!");
+            }
+        }
 
-                StringBuffer fileContent = new StringBuffer("");
-
-                byte[] buffer = new byte[1024];
-                int n;
-                try {
-                    while ((n = inputStream.read(buffer)) != -1) {
-                        fileContent.append(new String(buffer, 0, n));
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                String flightString = fileContent.toString();
-
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                File tempFile = new File(flightTempFilePath);
-                if (tempFile.exists()) {
-                    tempFile.delete();
-                } */
+        private void handleReadFlight(CallbackContext callbackContext) {
+            if (callbackContext != null) {
                 JSONObject flight = ServiceDataTransfer.getInstance().get_flight();
-                
-                ServiceDataTransfer.getInstance().resetData();
-                
+
                 if (flight != null) {
                     Log.d(TAG, "Calling back to the client with a flight JSON object which was retrieved from the export service.");
                     callbackContext.success(flight);
@@ -178,8 +166,7 @@ public class TLMDecoder extends CordovaPlugin {
                     callbackContext.error("Did not get a flight back from the service.");
                 }
             } else {
-              Log.w(TAG, "Cannot callback to the client because there was no callback context!");
-              ServiceDataTransfer.getInstance().resetData();
+                Log.w(TAG, "Cannot callback to the client because there was no callback context!");
             }
         }
     }
