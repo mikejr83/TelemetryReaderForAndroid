@@ -56,8 +56,11 @@ angular.module('telemetryReaderForAndroid.services', [])
     };
 
     var testOne = true;
-
-    this.getTestData = function () {
+    
+    /**
+      * Testing getting file data.
+      */
+    this._getTestFileData = function () {
       var deferred = $q.defer();
 
       if (testOne) {
@@ -73,6 +76,47 @@ angular.module('telemetryReaderForAndroid.services', [])
       }
       testOne = !testOne;
 
+      return deferred.promise;
+    };
+    
+    this._consoleSave = function(data, filename){
+      if(!data) {
+          console.error('Console.save: No data')
+          return;
+      }
+
+      if(!filename) filename = 'console.json'
+
+      if(typeof data === "object"){
+          data = JSON.stringify(data, undefined, 4)
+      }
+
+      var blob = new Blob([data], {type: 'text/json'}),
+          e    = document.createEvent('MouseEvents'),
+          a    = document.createElement('a')
+
+      a.download = filename
+      a.href = window.URL.createObjectURL(blob)
+      a.dataset.downloadurl =  ['text/json', a.download, a.href].join(':')
+      e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+      a.dispatchEvent(e)
+    };
+      
+    /**
+      * Testing getting decoded flight data.
+      */
+    this._getTestFlightData = function (flight) {
+      var deferred = $q.defer();
+      
+      console.log('Getting test decoded flight data for: ', flight);
+      
+      $http.get('js/flight' + flight._id + '_data.json').then(function (response) {
+        console.log('Test data returned', response.data);
+        deferred.resolve(response.data);
+      }, function(error) {
+        console.log('http get error for flight!', error);
+      });
+      
       return deferred.promise;
     };
 
@@ -97,7 +141,7 @@ angular.module('telemetryReaderForAndroid.services', [])
           });
       } else {
         console.log('getting test data');
-        this.getTestData().then(function (data) {
+        this._getTestFileData().then(function (data) {
           that._setCurrentData(data);
           deferred.resolve(that.file);
         });
@@ -125,6 +169,15 @@ angular.module('telemetryReaderForAndroid.services', [])
     this.setSelectedFlight = function (flight) {
       var deferred = $q.defer(),
         that = this;
+        
+      var successHandler = function (decodedFlight) {
+          that._setCurrentFlight(decodedFlight);
+          deferred.resolve(that.selectedFlight);
+        },
+        errorHandler = function (error) {
+          console.error("error during decoding of flight.", error);
+          deferred.reject(error);
+        };
 
       if (window.com && window.com.monstarmike 
           && window.com.monstarmike.telemetry 
@@ -132,13 +185,9 @@ angular.module('telemetryReaderForAndroid.services', [])
           && window.com.monstarmike.telemetry.plugins.tlmDecoder 
           && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight) {
         console.log("Sending uri: ", this.file.uri);
-        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file.uri, flight, function (decodedFlight) {
-          that._setCurrentFlight(decodedFlight);
-          deferred.resolve(that.selectedFlight);
-        }, function (error) {
-          console.error("error during decoding of flight.", error);
-          deferred.reject(error);
-        });
+        window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file.uri, flight, successHandler, errorHandler);
+      } else {
+        this._getTestFlightData(flight).then(successHandler, errorHandler);
       }
       
       return deferred.promise;
