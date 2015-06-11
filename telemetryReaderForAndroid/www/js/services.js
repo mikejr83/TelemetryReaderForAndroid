@@ -1,9 +1,24 @@
 angular.module('telemetryReaderForAndroid.services', [])
   .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
+    /**
+     * Current working file.
+     */
     this.file = null;
+    /**
+     * The selected flight. This value should only be populated by the setter to insure that it is the fully decoded JSON.
+     */
     this.selectedFlight = null;
+    /**
+     * The currently selected telemetry key. Used to find the telemetry data in the selected flight.
+     */
     this.selectedKey = 'altitude';
+    /**
+     * The title which appears at the top of the page.
+     */
     this.selectedTitle = 'Altitude';
+    /**
+     *
+     */
     this.chart = null;
 
     this._setCurrentData = function (data) {
@@ -18,7 +33,7 @@ angular.module('telemetryReaderForAndroid.services', [])
       console.log('file done', this.file);
     };
 
-    this._setCurrentFlight = function(flight) {
+    this._setCurrentFlight = function (flight) {
       var chartDefinitions = chartDefinitionsService.getChartDefinitions();
       for (var sensorType in chartDefinitions) {
         if (chartDefinitions.hasOwnProperty(sensorType)) {
@@ -55,80 +70,49 @@ angular.module('telemetryReaderForAndroid.services', [])
       }
     };
 
-    var testOne = true;
-    
     /**
-      * Testing getting file data.
-      */
+     * Testing getting file data.
+     */
     this._getTestFileData = function () {
       var deferred = $q.defer();
 
-      if (testOne) {
-        console.log('testone');
-        $http.get('js/file_data.json').then(function (response) {
-          deferred.resolve(response.data);
-        });
-      } else {
-        console.log('test two');
-        $http.get('js/file_data.json').then(function (response) {
-          deferred.resolve(response.data);
-        });
-      }
-      testOne = !testOne;
+      $http.get('js/file_data.json').then(function (response) {
+        deferred.resolve(response.data);
+      });
 
       return deferred.promise;
     };
-    
-    this._consoleSave = function(data, filename){
-      if(!data) {
-          console.error('Console.save: No data')
-          return;
-      }
 
-      if(!filename) filename = 'console.json'
-
-      if(typeof data === "object"){
-          data = JSON.stringify(data, undefined, 4)
-      }
-
-      var blob = new Blob([data], {type: 'text/json'}),
-          e    = document.createEvent('MouseEvents'),
-          a    = document.createElement('a')
-
-      a.download = filename
-      a.href = window.URL.createObjectURL(blob)
-      a.dataset.downloadurl =  ['text/json', a.download, a.href].join(':')
-      e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-      a.dispatchEvent(e)
-    };
-      
     /**
-      * Testing getting decoded flight data.
-      */
+     * Private - Gets testing data from prebuilt JSON.
+     * @param   {Object}  flight Flight descriptor from the file object
+     * @returns {Promise} A promise to resolve with fully decoded flight JSON.
+     */
     this._getTestFlightData = function (flight) {
       var deferred = $q.defer();
-      
+
       console.log('Getting test decoded flight data for: ', flight);
-      
+
       $http.get('js/flight' + flight._id + '_data.json').then(function (response) {
         console.log('Test data returned', response.data);
         deferred.resolve(response.data);
-      }, function(error) {
+      }, function (error) {
         console.log('http get error for flight!', error);
       });
-      
+
       return deferred.promise;
     };
 
+    /**
+     * Loads data by asking the plugin to start the native file chooser.
+     * @param   {Boolean} storeAsCurrent After loading the data store it as the current file information
+     * @returns {Promise} Promise to resolve with the decoded data from the native plugin.
+     */
     this.loadData = function (storeAsCurrent) {
       var deferred = $q.defer(),
         that = this;
 
-      if (window.com && window.com.monstarmike 
-          && window.com.monstarmike.telemetry 
-          && window.com.monstarmike.telemetry.plugins 
-          && window.com.monstarmike.telemetry.plugins.tlmDecoder 
-          && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
+      if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && window.com.monstarmike.telemetry.plugins.tlmDecoder && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
         window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile(function (data) {
             if (storeAsCurrent && data) {
               that._setCurrentData(that.file);
@@ -150,6 +134,10 @@ angular.module('telemetryReaderForAndroid.services', [])
       return deferred.promise;
     };
 
+    /**
+     * Gets the currently loaded file. If one is not loaded it will load it and set it as the current working file.
+     * @returns {Promise} A promise to resolve with loaded file JSON.
+     */
     this.getCurrentData = function () {
       var deferred = $q.defer(),
         that = this;
@@ -165,11 +153,16 @@ angular.module('telemetryReaderForAndroid.services', [])
 
       return deferred.promise;
     };
-    
+
+    /**
+     * Sets the currently selected flight to the fully decoded flight JSON. If this flight was previously fully decoded it will not execute the native decoding code.
+     * @param   {Object}  flight Flight object that is either a flight stub from the file JSON or fully decoded JSON from the native call.
+     * @returns {Promise} A promise to resolve with fully decoded flight JSON.
+     */
     this.setSelectedFlight = function (flight) {
       var deferred = $q.defer(),
         that = this;
-        
+
       var successHandler = function (decodedFlight) {
           that._setCurrentFlight(decodedFlight);
           deferred.resolve(that.selectedFlight);
@@ -179,17 +172,13 @@ angular.module('telemetryReaderForAndroid.services', [])
           deferred.reject(error);
         };
 
-      if (window.com && window.com.monstarmike 
-          && window.com.monstarmike.telemetry 
-          && window.com.monstarmike.telemetry.plugins 
-          && window.com.monstarmike.telemetry.plugins.tlmDecoder 
-          && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight) {
+      if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && window.com.monstarmike.telemetry.plugins.tlmDecoder && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight) {
         console.log("Sending uri: ", this.file.uri);
         window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file.uri, flight, successHandler, errorHandler);
       } else {
         this._getTestFlightData(flight).then(successHandler, errorHandler);
       }
-      
+
       return deferred.promise;
     };
       }]);
