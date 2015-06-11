@@ -33,40 +33,49 @@ angular.module('telemetryReaderForAndroid.services', [])
       console.log('file done', this.file);
     };
 
+    /**
+     * Private - Sets the current flight.
+     * @param {Object} flight Decoded flight JSON.
+     */
     this._setCurrentFlight = function (flight) {
       var chartDefinitions = chartDefinitionsService.getChartDefinitions();
-      for (var sensorType in chartDefinitions) {
-        if (chartDefinitions.hasOwnProperty(sensorType)) {
-          if (flight.flightData[sensorType] === undefined) {
-            console.warn('Flight doesn\'t have:', sensorType);
-            flight.flightData[sensorType] = chartDefinitions[sensorType];
-          } else {
-            flight.flightData[sensorType].basic = chartDefinitions[sensorType].basic;
-            _.forEach(chartDefinitions[sensorType].chartSeriesTypes, function (baseSeries, index) {
-              var series = flight.flightData[sensorType].chartSeriesTypes[index];
-              if (!series) {
-                console.warn('base series not found for sensor: ' + sensorType + ' - ' + index);
-              }
-              series.selected = baseSeries.selected
-              series.axis = baseSeries.axis;
-              series.tooltip = baseSeries.tooltip
-            });
+
+      if (flight) {
+        for (var sensorType in chartDefinitions) {
+          if (chartDefinitions.hasOwnProperty(sensorType)) {
+            if (flight.flightData[sensorType] === undefined) {
+              console.warn('Flight doesn\'t have:', sensorType);
+              flight.flightData[sensorType] = chartDefinitions[sensorType];
+            } else {
+              flight.flightData[sensorType].basic = chartDefinitions[sensorType].basic;
+              _.forEach(chartDefinitions[sensorType].chartSeriesTypes, function (baseSeries, index) {
+                var series = flight.flightData[sensorType].chartSeriesTypes[index];
+                if (!series) {
+                  console.warn('base series not found for sensor: ' + sensorType + ' - ' + index);
+                }
+                series.selected = baseSeries.selected
+                series.axis = baseSeries.axis;
+                series.tooltip = baseSeries.tooltip
+              });
+            }
           }
         }
       }
 
       this.selectedFlight = flight;
 
-      var flightIndex = -1;
-      _.forEach(this.file.flights, function (cachedFlight, index) {
-        if (cachedFlight['_id'] == flight['_id']) {
-          flightIndex = index;
-          flight['_cached'] = true;
-        }
-      });
+      if (flight) {
+        var flightIndex = -1;
+        _.forEach(this.file.flights, function (cachedFlight, index) {
+          if (cachedFlight['_id'] == flight['_id']) {
+            flightIndex = index;
+            flight['_cached'] = true;
+          }
+        });
 
-      if (flightIndex > -1) {
-        this.file.flights[flightIndex] = flight;
+        if (flightIndex > -1) {
+          this.file.flights[flightIndex] = flight;
+        }
       }
     };
 
@@ -93,12 +102,16 @@ angular.module('telemetryReaderForAndroid.services', [])
 
       console.log('Getting test decoded flight data for: ', flight);
 
-      $http.get('js/flight' + flight._id + '_data.json').then(function (response) {
-        console.log('Test data returned', response.data);
-        deferred.resolve(response.data);
-      }, function (error) {
-        console.log('http get error for flight!', error);
-      });
+      if (flight) {
+        $http.get('js/flight' + flight._id + '_data.json').then(function (response) {
+          console.log('Test data returned', response.data);
+          deferred.resolve(response.data);
+        }, function (error) {
+          console.log('http get error for flight!', error);
+        });
+      } else {
+        deferred.resolve(null);
+      }
 
       return deferred.promise;
     };

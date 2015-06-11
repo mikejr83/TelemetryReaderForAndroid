@@ -1,0 +1,12 @@
+<ion-view view-title="Telemetry File Information">
+  <ion-content>
+
+    <ion-list>
+      <ion-item class="item-complex" ng-repeat="flight in service.file.flights">
+       <a class="item-content">
+         {{$index + 1}}. {{flight.duration}}
+       </a>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>

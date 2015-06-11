@@ -1,23 +1,35 @@
 angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndroid.services'])
-
   .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', '$window', 'dataService',
                           function ($scope, $ionicModal, $timeout, $window, dataService) {
+      /**
+       * A scope level reference to the data service
+       */
+      $scope.service = dataService;
+      $scope.selectedFlight = dataService.selectedFlight;
+
+      var selectedFlightSuccessHandler = function (selectedFlight) {
+          $scope.selectedFlight = selectedFlight;
+        },
+        selectedFlightErrorHandler = function (error) {
+          console.error("Error during the selected flight handler.", error);
+        };
+
       $scope.doGetDataFile = function () {
-        console.log('get data file');
-
-        dataService.loadData(true).then(function (data) {
-          if (dataService.flgiths && dataService.flights.length > 0) {
-            dataService.selectedFlight = dataService.flights[0];
+        $scope.service.loadData(true).then(function (data) {
+          // ignoring data since we loaded data and set it to the current. data === $scope.service.file
+          if ($scope.service.file.flights && $scope.service.file.flights.length > 0) {
+            $scope.service.setSelectedFlight($scope.service.file.flights[0])
+              .then(selectedFlightSuccessHandler, selectedFlightErrorHandler);
           } else {
-            dataService.selectedFlight = null;
+            $scope.service.setSelectedFlight(null)
+              .then(selectedFlightSuccessHandler, selectedFlightErrorHandler);
           }
-
         });
       };
 
       $scope.setTelemetryType = function (key, title) {
-        dataService.selectedKey = key;
-        dataService.selectedTitle = title;
+        $scope.service.selectedKey = key;
+        $scope.service.selectedTitle = title;
         $window.title = title;
       }
 }])
@@ -36,7 +48,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           $ionicLoading.show();
           dataService.getCurrentData().then(function (file) {
             if (file && file.flights && file.flights.length > 0) {
-              $scope.service.setSelectedFlight(file.flights[0]).then(function() {
+              $scope.service.setSelectedFlight(file.flights[0]).then(function () {
                 $scope.selectedFlightChanged();
               });
             } else {
@@ -137,12 +149,11 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
       $scope.selectChanged = function (flight) {
         $ionicLoading.show();
 
-        if ($scope.service.selectedFlight['_cached'] === undefined
-        || !$scope.service.selectedFlight['_cached']) {
+        if ($scope.service.selectedFlight['_cached'] === undefined || !$scope.service.selectedFlight['_cached']) {
           window.setTimeout(function () {
-            $scope.service.setSelectedFlight($scope.service.selectedFlight).then(function(decodedFlight) {
+            $scope.service.setSelectedFlight($scope.service.selectedFlight).then(function (decodedFlight) {
               $scope.selectedFlightChanged();
-             });
+            });
           }, 100);
         } else {
           $scope.selectedFlightChanged();
@@ -164,4 +175,24 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
       $scope.$watch('service.selectedKey', function () {
         $scope.selectedFlightChanged();
       });
+}])
+  .controller('FileInfoController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService', function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
+
+    $scope.service = dataService;
+
+    $scope.$on('$ionicView.enter', function () {
+      if (!$scope.service.flights) {
+        $ionicLoading.show();
+        dataService.getCurrentData().then(function (file) {
+          if (file && file.flights && file.flights.length > 0) {
+            $scope.service.setSelectedFlight(file.flights[0]).then(function () {
+              $ionicLoading.hide();
+            });
+          } else {
+            $ionicLoading.hide();
+          }
+        });
+      }
+    });
+
 }]);
