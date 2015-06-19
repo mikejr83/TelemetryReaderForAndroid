@@ -1,5 +1,5 @@
 angular.module('telemetryReaderForAndroid.services', [])
-  .service('dataService', ['$q', '$http', 'chartDefinitionsService', function ($q, $http, chartDefinitionsService) {
+  .service('dataService', ['$q', '$http', '$log', 'chartDefinitionsService', function ($q, $http, $log, chartDefinitionsService) {
     /**
      * Current working file.
      */
@@ -24,13 +24,13 @@ angular.module('telemetryReaderForAndroid.services', [])
     this._setCurrentData = function (data) {
       this.file = data;
 
-      console.log('file', this.file);
+      $log.debug('file', this.file);
 
       _.forEach(this.file.flights, function (flight, index) {
 
       });
 
-      console.log('file done', this.file);
+      $log.debug('file done', this.file);
     };
 
     /**
@@ -44,14 +44,14 @@ angular.module('telemetryReaderForAndroid.services', [])
         for (var sensorType in chartDefinitions) {
           if (chartDefinitions.hasOwnProperty(sensorType)) {
             if (flight.flightData[sensorType] === undefined) {
-              console.warn('Flight doesn\'t have:', sensorType);
+              $log.warn('Flight doesn\'t have:', sensorType);
               flight.flightData[sensorType] = chartDefinitions[sensorType];
             } else {
               flight.flightData[sensorType].basic = chartDefinitions[sensorType].basic;
               _.forEach(chartDefinitions[sensorType].chartSeriesTypes, function (baseSeries, index) {
                 var series = flight.flightData[sensorType].chartSeriesTypes[index];
                 if (!series) {
-                  console.warn('base series not found for sensor: ' + sensorType + ' - ' + index);
+                  $log.warn('base series not found for sensor: ' + sensorType + ' - ' + index);
                 }
                 series.selected = baseSeries.selected
                 series.axis = baseSeries.axis;
@@ -100,14 +100,14 @@ angular.module('telemetryReaderForAndroid.services', [])
     this._getTestFlightData = function (flight) {
       var deferred = $q.defer();
 
-      console.log('Getting test decoded flight data for: ', flight);
+      $log.debug('Getting test decoded flight data for: ', flight);
 
       if (flight) {
         $http.get('js/flight' + flight._id + '_data.json').then(function (response) {
-          console.log('Test data returned', response.data);
+          $log.debug('Test data returned', response.data);
           deferred.resolve(response.data);
         }, function (error) {
-          console.log('http get error for flight!', error);
+          $log.error('http get error for flight!', error);
         });
       } else {
         deferred.resolve(null);
@@ -137,7 +137,7 @@ angular.module('telemetryReaderForAndroid.services', [])
             deferred.reject(e);
           });
       } else {
-        console.log('getting test data');
+        $log.debug('getting test data');
         this._getTestFileData().then(function (data) {
           that._setCurrentData(data);
           deferred.resolve(that.file);
@@ -181,12 +181,12 @@ angular.module('telemetryReaderForAndroid.services', [])
           deferred.resolve(that.selectedFlight);
         },
         errorHandler = function (error) {
-          console.error("error during decoding of flight.", error);
+          $log.error("error during decoding of flight.", error);
           deferred.reject(error);
         };
 
       if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && window.com.monstarmike.telemetry.plugins.tlmDecoder && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight) {
-        console.log("Sending uri: ", this.file.uri);
+        $log.debug("Sending uri: ", this.file.uri);
         window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file.uri, flight, successHandler, errorHandler);
       } else {
         this._getTestFlightData(flight).then(successHandler, errorHandler);
