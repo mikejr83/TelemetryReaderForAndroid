@@ -22,14 +22,13 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
 
 .config(['$stateProvider', '$urlRouterProvider', '$logProvider', function ($stateProvider, $urlRouterProvider, $logProvider) {
   $stateProvider
-
     .state('app', {
-    url: "/app",
-    abstract: true,
-    templateUrl: "templates/menu.html",
-    controller: 'AppCtrl'
-  })
-  .state('app.fileinfo', {
+      url: "/app",
+      abstract: true,
+      templateUrl: "templates/menu.html",
+      controller: 'AppCtrl'
+    })
+    .state('app.fileinfo', {
       url: "/fileinfo",
       views: {
         'menuContent': {
@@ -38,7 +37,7 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
         }
       }
     })
-  .state('app.telemetry', {
+    .state('app.telemetry', {
       url: "/telemetry",
       views: {
         'menuContent': {
