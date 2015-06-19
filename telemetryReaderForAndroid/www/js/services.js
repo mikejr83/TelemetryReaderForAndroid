@@ -24,13 +24,13 @@ angular.module('telemetryReaderForAndroid.services', [])
     this._setCurrentData = function (data) {
       this.file = data;
 
-      $log.debug('file', this.file);
-
+      $log.debug('The current data file is now:', this.file);
+      $log.debug('Doing client side additional processing of each flight object.');
       _.forEach(this.file.flights, function (flight, index) {
-
+        // no additional client processing is required at this time.
       });
 
-      $log.debug('file done', this.file);
+      $log.debug('Additional processing is complete.', this.file);
     };
 
     /**
@@ -100,14 +100,14 @@ angular.module('telemetryReaderForAndroid.services', [])
     this._getTestFlightData = function (flight) {
       var deferred = $q.defer();
 
-      $log.debug('Getting test decoded flight data for: ', flight);
+      $log.debug('Sending HTTP GET for decoded flight test data for this stub:', flight);
 
       if (flight) {
         $http.get('js/flight' + flight._id + '_data.json').then(function (response) {
           $log.debug('Test data returned', response.data);
           deferred.resolve(response.data);
         }, function (error) {
-          $log.error('http get error for flight!', error);
+          $log.error('HTTP GET error for flight!', error);
         });
       } else {
         deferred.resolve(null);
@@ -137,7 +137,7 @@ angular.module('telemetryReaderForAndroid.services', [])
             deferred.reject(e);
           });
       } else {
-        $log.debug('getting test data');
+        $log.debug('Detected that the Cordova plugin for TLM decoding is not present. Will get and hand back test data.');
         this._getTestFileData().then(function (data) {
           that._setCurrentData(data);
           deferred.resolve(that.file);
@@ -181,12 +181,12 @@ angular.module('telemetryReaderForAndroid.services', [])
           deferred.resolve(that.selectedFlight);
         },
         errorHandler = function (error) {
-          $log.error("error during decoding of flight.", error);
+          $log.error("There was an error during decoding of flight.", error);
           deferred.reject(error);
         };
 
       if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && window.com.monstarmike.telemetry.plugins.tlmDecoder && window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight) {
-        $log.debug("Sending uri: ", this.file.uri);
+        $log.debug("Sending this file URI:", this.file.uri);
         window.com.monstarmike.telemetry.plugins.tlmDecoder.decodeFlight(this.file.uri, flight, successHandler, errorHandler);
       } else {
         this._getTestFlightData(flight).then(successHandler, errorHandler);
