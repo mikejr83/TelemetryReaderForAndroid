@@ -2,9 +2,15 @@
   <ion-content>
 
     <ion-list>
-      <ion-item class="item-complex" ng-repeat="flight in service.file.flights">
+      <ion-item class="item-complex" ng-class="{'item-positive': flight == service.selectedFlight}" ng-repeat="flight in service.file.flights">
        <a class="item-content">
-         {{$index + 1}}. {{flight.duration}}
+         <h2>{{$index + 1}}. {{flight.duration}}</h2>
+         <div class="flightInfo">
+           <label>Model Name: </label><span>{{flight.name}}</span>
+           <label>Model #: </label><span>{{flight.modelNumber}}</span>
+           <label>Model Type: </label><span>{{flight.modelType}}</span>
+           <label>Bind Info: </label><span>{{flight.bindInfo}}</span>
+         </div>
        </a>
       </ion-item>
     </ion-list>
