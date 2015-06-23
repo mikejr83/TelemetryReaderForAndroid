@@ -72,7 +72,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         if (!$scope.service.selectedKey)
           $scope.service.selectedKey = 'current';
 
-        if (!$scope.service.flights) {
+        if (!$scope.service.file) {
           $ionicLoading.show();
           dataService.getCurrentData().then(function (file) {
             if (file && file.flights && file.flights.length > 0) {
@@ -226,12 +226,13 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         $scope.selectedFlightChanged();
       });
 }])
-  .controller('FileInfoController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService', function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
+  .controller('FileInfoController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService',
+                                     function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
 
     $scope.service = dataService;
 
     $scope.$on('$ionicView.enter', function () {
-      if (!$scope.service.flights) {
+      if (!$scope.service.file) {
         $ionicLoading.show();
         dataService.getCurrentData().then(function (file) {
           if (file && file.flights && file.flights.length > 0) {
