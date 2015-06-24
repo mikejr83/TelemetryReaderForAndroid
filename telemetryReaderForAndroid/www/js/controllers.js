@@ -222,28 +222,46 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         $scope.selectedFlightChanged();
       }
 
+      $scope.shareChart = function () {
+        var filename = 'telemetry_' + $scope.service.selectedKey + '_'
+            $scope.service.selectedFlight.name.replace(' ', '').replace('.', '') + '.png';
+
+        $('#myChart canvas')[0].toBlob(function (blob) {
+          $log.debug('Canvas has been exported to a blob.');
+          if (window.plugins && window.plugins.socialsharing && window.plugins.socialsharing.share) {
+            $log.debug('Exporting the image data to the social sharing plugin.');
+            window.plugins.socialsharing.share(null, filename, imageData);
+          } else {
+            $log.debug('Saving the file with browser functionality.');
+            saveAs(blob, filename);
+          }
+        });
+      };
+
       $scope.$watch('service.selectedKey', function () {
         $scope.selectedFlightChanged();
       });
+
+
 }])
   .controller('FileInfoController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService',
                                      function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
 
-    $scope.service = dataService;
+      $scope.service = dataService;
 
-    $scope.$on('$ionicView.enter', function () {
-      if (!$scope.service.file) {
-        $ionicLoading.show();
-        dataService.getCurrentData().then(function (file) {
-          if (file && file.flights && file.flights.length > 0) {
-            $scope.service.setSelectedFlight(file.flights[0]).then(function () {
+      $scope.$on('$ionicView.enter', function () {
+        if (!$scope.service.file) {
+          $ionicLoading.show();
+          dataService.getCurrentData().then(function (file) {
+            if (file && file.flights && file.flights.length > 0) {
+              $scope.service.setSelectedFlight(file.flights[0]).then(function () {
+                $ionicLoading.hide();
+              });
+            } else {
               $ionicLoading.hide();
-            });
-          } else {
-            $ionicLoading.hide();
-          }
-        });
-      }
-    });
+            }
+          });
+        }
+      });
 
 }]);
