@@ -25,7 +25,8 @@
     {
       "locator": "../plugins/com.monstarmike.telemetry.plugins.tlmDecoder",
       "id": "com.monstarmike.telemetry.plugins"
-    }
+    },
+    "nl.x-services.plugins.socialsharing"
   ],
   "cordovaPlatforms": [
     "android"
