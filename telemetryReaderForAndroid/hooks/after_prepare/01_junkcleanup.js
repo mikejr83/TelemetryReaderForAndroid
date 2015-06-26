@@ -8,15 +8,23 @@ var foldersToProcess = [
     "css"
 ];
 
+console.log('Folders to process:', foldersToProcess);
+
 var baseFolders = ['platforms/android/assets/www/'];
  
 foldersToProcess.forEach(function(folder) {
+	console.log('Processing folder:', folder);
     baseFolders.forEach(function(baseFolder) {
       processFiles(baseFolder + folder);
     });
 });
  
 function processFiles(dir) {
+	if (!fs.existsSync(dir)) {
+		console.log('Directory doesn\'t exit:', dir);
+		return;
+	}
+	
     fs.readdir(dir, function(err, list) {
         if(err) {
             console.log('processFiles err: ' + err);
