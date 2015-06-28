@@ -1,15 +1,8 @@
 package com.monstarmike.telemetry.plugins;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-
-import org.joda.time.Duration;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.monstarmike.tlmreader.Flight;
 import com.monstarmike.tlmreader.datablock.AirspeedBlock;
@@ -26,256 +19,30 @@ import com.monstarmike.tlmreader.datablock.StandardBlock;
 import com.monstarmike.tlmreader.datablock.VarioBlock;
 import com.monstarmike.tlmreader.datablock.VoltageBlock;
 
+import org.joda.time.Duration;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 
 public class Exporter {
     Iterable<Flight> flights;
     Uri uri;
+    Context context;
 
     private static final String TAG = "TLMDecoder";
-    private static final String JSONTemplate = "{\n" +
-"  \"altitude\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Altitude\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  },\n" +
-"  \"current\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Current\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  },\n" +
-"  \"gforce\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"X\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Y\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Z\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Max X\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Max Y\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Max Z\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"name\": \"Min Z\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  },\n" +
-"  \"powerbox\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Voltage One\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          },\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Voltage Two\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Capacity One\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          },\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Capacity Two\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  },\n" +
-"  \"rx\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"A\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          },\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"B\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          },\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"L\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          },\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"R\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Frame Loss\",\n" +
-"            \"axisYType\": \"secondary\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          },\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Holds\",\n" +
-"            \"axisYType\": \"secondary\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"RX Voltage\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  },\n" +
-"  \"standard\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"RPM\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Temperature\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      },\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"Voltage\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  },\n" +
-"  \"vario\": {\n" +
-"    \"chartSeriesTypes\": [\n" +
-"      {\n" +
-"        \"data\": [\n" +
-"          {\n" +
-"            \"showInLegend\": true,\n" +
-"            \"name\": \"RPM\",\n" +
-"            \"type\": \"line\",\n" +
-"            \"dataPoints\": []\n" +
-"          }\n" +
-"        ]\n" +
-"      }\n" +
-"    ]\n" +
-"  }\n" +
-"}";
 
-    public Exporter(Uri uri, Iterable<Flight> flights) {
+    public Exporter(Uri uri, Iterable<Flight> flights, Context context) {
         this.flights = flights;
         this.uri = uri;
+        this.context = context;
     }
 
     public JSONObject exportFlights() {
@@ -292,13 +59,13 @@ public class Exporter {
 
         int index = 0;
         for (Flight flight : this.flights) {
-            JSONObject flightJO =this.buildFlight(false, flight);
-                try {
-                    flightJO.put("_id", index++);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                flightsArray.put(flightJO);
+            JSONObject flightJO = this.buildFlight(false, flight);
+            try {
+                flightJO.put("_id", index++);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            flightsArray.put(flightJO);
         }
 
         return file;
@@ -324,7 +91,7 @@ public class Exporter {
 
             Log.d(TAG, "Found flight. Going to do a full decode.");
             newFlightJO = this.buildFlight(true, flight);
-            if(newFlightJO != null) {
+            if (newFlightJO != null) {
                 try {
                     newFlightJO.put("_id", joId);
                 } catch (JSONException e) {
@@ -356,15 +123,15 @@ public class Exporter {
             flightJO.put("duration", hms.print(period));
 
             Iterator<HeaderBlock> iterator = flight.get_headerBlocks();
-            while(iterator.hasNext()) {
-              HeaderBlock headerBlock = iterator.next();
-              if (headerBlock instanceof HeaderNameBlock) {
-                HeaderNameBlock nameBlock = (HeaderNameBlock)headerBlock;
-                flightJO.put("name", nameBlock.get_modelName());
-                flightJO.put("modelNumber", nameBlock.get_modelNumber());
-                flightJO.put("bindInfo", nameBlock.get_bindInfo());
-                flightJO.put("modelType", nameBlock.get_modelType());
-              }
+            while (iterator.hasNext()) {
+                HeaderBlock headerBlock = iterator.next();
+                if (headerBlock instanceof HeaderNameBlock) {
+                    HeaderNameBlock nameBlock = (HeaderNameBlock) headerBlock;
+                    flightJO.put("name", nameBlock.get_modelName());
+                    flightJO.put("modelNumber", nameBlock.get_modelNumber());
+                    flightJO.put("bindInfo", nameBlock.get_bindInfo());
+                    flightJO.put("modelType", nameBlock.get_modelType());
+                }
             }
         } catch (JSONException e) {
             // TODO Auto-generated catch block
@@ -412,7 +179,34 @@ public class Exporter {
     }
 
     private JSONObject loadChartDataTemplate() throws JSONException {
-        return new JSONObject(JSONTemplate);
+        BufferedReader reader = null;
+        String jsonTemplate = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(context.getAssets().open("json/chartTemplate.json")));
+            String line = reader.readLine();
+            StringBuilder stringBuilder = new StringBuilder();
+            while (line != null) {
+                stringBuilder.append(line);
+                line = reader.readLine();
+            }
+            jsonTemplate = reader.readLine();
+        } catch (IOException e) {
+            Log.e(TAG, "Error while reading JSON template.", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error while trying to close JSON template reader", e);
+                }
+            }
+        }
+
+        if (jsonTemplate == null || jsonTemplate.equalsIgnoreCase("")) {
+            Log.e(TAG, "The template read from assets is null!");
+        }
+
+        return new JSONObject(jsonTemplate);
     }
 
     private JSONArray findDataPointsArray(JSONObject flightData, String sensorName,
@@ -437,9 +231,9 @@ public class Exporter {
             jsonHeaderBlock.put("modelType", nameBlock.get_modelType());
         }
 
-        if(jsonHeaderBlock == null) return;
+        if (jsonHeaderBlock == null) return;
 
-        if(jsonFlight.has("headers")) {
+        if (jsonFlight.has("headers")) {
             jsonFlight.getJSONArray("headers").put(jsonHeaderBlock);
         } else {
             JSONArray headersArray = new JSONArray();
@@ -465,7 +259,7 @@ public class Exporter {
             CurrentBlock currentBlock = (CurrentBlock) dataBlock;
             jsonBlock.put("y", currentBlock.get_Current());
 
-            this.findDataPointsArray(flightData, "current", 0,0).put(jsonBlock);
+            this.findDataPointsArray(flightData, "current", 0, 0).put(jsonBlock);
         } else if (dataBlock instanceof GForceBlock) {
             JSONObject jsonBlock = new JSONObject();
             jsonBlock.put("x", dataBlock.get_timestamp());
@@ -481,9 +275,9 @@ public class Exporter {
 
         } else if (dataBlock instanceof PowerboxBlock) {
             JSONObject v1Block = new JSONObject(),
-                v2Block = new JSONObject(),
-                cap1Block = new JSONObject(),
-                cap2Block = new JSONObject();
+                    v2Block = new JSONObject(),
+                    cap1Block = new JSONObject(),
+                    cap2Block = new JSONObject();
 
             v1Block.put("x", dataBlock.get_timestamp());
             v2Block.put("x", dataBlock.get_timestamp());

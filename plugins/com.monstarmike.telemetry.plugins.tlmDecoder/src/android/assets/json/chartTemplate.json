@@ -1,0 +1,239 @@
+{
+  "altitude": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "name": "Altitude",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  },
+  "current": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "name": "Current",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  },
+  "gforce": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "name": "X",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "name": "Y",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "name": "Z",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "name": "Max X",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "name": "Max Y",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "name": "Max Z",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "name": "Min Z",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  },
+  "powerbox": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "Voltage One",
+            "type": "line",
+            "dataPoints": []
+          },
+          {
+            "showInLegend": true,
+            "name": "Voltage Two",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "Capacity One",
+            "type": "line",
+            "dataPoints": []
+          },
+          {
+            "showInLegend": true,
+            "name": "Capacity Two",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  },
+  "rx": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "A",
+            "type": "line",
+            "dataPoints": []
+          },
+          {
+            "showInLegend": true,
+            "name": "B",
+            "type": "line",
+            "dataPoints": []
+          },
+          {
+            "showInLegend": true,
+            "name": "L",
+            "type": "line",
+            "dataPoints": []
+          },
+          {
+            "showInLegend": true,
+            "name": "R",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "Frame Loss",
+            "axisYType": "secondary",
+            "type": "line",
+            "dataPoints": []
+          },
+          {
+            "showInLegend": true,
+            "name": "Holds",
+            "axisYType": "secondary",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "RX Voltage",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  },
+  "standard": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "RPM",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "Temperature",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      },
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "Voltage",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  },
+  "vario": {
+    "chartSeriesTypes": [
+      {
+        "data": [
+          {
+            "showInLegend": true,
+            "name": "RPM",
+            "type": "line",
+            "dataPoints": []
+          }
+        ]
+      }
+    ]
+  }
+}
