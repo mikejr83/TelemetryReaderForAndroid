@@ -230,7 +230,16 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           $log.debug('Canvas has been exported to a blob.');
           if (window.plugins && window.plugins.socialsharing && window.plugins.socialsharing.share) {
             $log.debug('Exporting the image data to the social sharing plugin.');
-            window.plugins.socialsharing.share(null, filename, imageData);
+            var message = "",
+				subject = "",
+				url = null,
+				successCallback = function () {
+					$log.debug('success!');
+				},
+				errorCallback = function (error) {
+					$log.error('There was an error during the attempt to share via the sharing plugin!', error);
+				};
+            window.plugins.socialsharing.share(message, subject, blob, url, successCallback, errorCallback);
           } else {
             $log.debug('Saving the file with browser functionality.');
             saveAs(blob, filename);

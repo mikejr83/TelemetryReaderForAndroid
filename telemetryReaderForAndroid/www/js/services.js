@@ -128,7 +128,7 @@ angular.module('telemetryReaderForAndroid.services', [])
       if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && window.com.monstarmike.telemetry.plugins.tlmDecoder && window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile) {
         window.com.monstarmike.telemetry.plugins.tlmDecoder.openFile(function (data) {
             if (storeAsCurrent && data) {
-              that._setCurrentData(that.file);
+              that._setCurrentData(data);
             }
 
             deferred.resolve(data);
