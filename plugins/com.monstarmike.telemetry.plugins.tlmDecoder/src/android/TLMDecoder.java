@@ -1,4 +1,4 @@
-package com.monstarmike.telemetry.plugins;
+package com.monstarmike.telemetry.plugins.tlmDecoder;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

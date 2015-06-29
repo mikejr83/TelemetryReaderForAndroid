@@ -1,4 +1,4 @@
-package com.monstarmike.telemetry.plugins;
+package com.monstarmike.telemetry.plugins.tlmDecoder;
 
 /**
  * Created by mgardner on 6/5/15.

@@ -1,4 +1,4 @@
-package com.monstarmike.telemetry.plugins;
+package com.monstarmike.telemetry.plugins.tlmDecoder;
 
 import android.net.Uri;
 
