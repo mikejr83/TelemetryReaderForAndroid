@@ -7,7 +7,7 @@ var argscheck = require('cordova/argscheck'),
 		  
 	  }
 	  
-	  Sharing.prototype.share = function (message, imageBlob, successCallback, errorCallback) {
+	  Sharing.prototype.share = function (imageBlob, successCallback, errorCallback) {
 		  exec(function (result) {
 			  if (successCallback) {
 				  try {
@@ -24,7 +24,7 @@ var argscheck = require('cordova/argscheck'),
 					console.error('There was an error in the Sharing:share error callback!', e);
 				}
 			  }
-		  }, 'Sharing', 'share', []);
+		  }, 'Sharing', 'share', [imageBlob]);
 	  };
 	  
 	  module.exports = new Sharing();
