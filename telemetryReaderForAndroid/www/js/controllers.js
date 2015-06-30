@@ -226,25 +226,47 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         var filename = 'telemetry_' + $scope.service.selectedKey + '_'
             $scope.service.selectedFlight.name.replace(' ', '').replace('.', '') + '.png';
 
-        $('#myChart canvas')[0].toBlob(function (blob) {
+        /*$('#myChart canvas')[0].toBlob(function (blob) {
           $log.debug('Canvas has been exported to a blob.');
-          if (window.plugins && window.plugins.socialsharing && window.plugins.socialsharing.share) {
-            $log.debug('Exporting the image data to the social sharing plugin.');
-            var message = "",
-				subject = "",
-				url = null,
-				successCallback = function () {
+          var reader = new window.FileReader();
+          reader.onloadend = function () {
+			if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && 
+				window.com.monstarmike.telemetry.plugins.sharing && window.com.monstarmike.telemetry.plugins.sharing.share) {
+				$log.debug('Exporting the image data to the social sharing plugin.');
+				var successCallback = function () {
+						$log.debug('success!');
+					},
+					errorCallback = function (error) {
+						$log.error('There was an error during the attempt to share via the sharing plugin!', error);
+					};
+				window.com.monstarmike.telemetry.plugins.sharing.share(reader.result, successCallback, errorCallback);
+			  } else {
+				$log.debug('Saving the file with browser functionality.');
+				saveAs(blob, filename);
+			  }  
+		  };
+          reader.readAsDataURL(blob);
+        });*/
+        
+        
+        if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && 
+			window.com.monstarmike.telemetry.plugins.sharing && window.com.monstarmike.telemetry.plugins.sharing.share) {
+			$log.debug('Exporting the image data to the social sharing plugin.');
+			var dataUrl = $('#myChart canvas')[0].toDataURL('image/png');
+			var successCallback = function () {
 					$log.debug('success!');
 				},
 				errorCallback = function (error) {
 					$log.error('There was an error during the attempt to share via the sharing plugin!', error);
 				};
-            window.plugins.socialsharing.share(message, subject, blob, url, successCallback, errorCallback);
-          } else {
-            $log.debug('Saving the file with browser functionality.');
-            saveAs(blob, filename);
-          }
-        });
+			window.com.monstarmike.telemetry.plugins.sharing.share(dataUrl, successCallback, errorCallback);
+		  } else {
+			  ('#myChart canvas')[0].toBlob(function (blob) {
+				  $log.debug('Canvas has been exported to a blob.');
+				  $log.debug('Saving the file with browser functionality.');
+				  saveAs(blob, filename);
+			  });
+		  }
       };
 
       $scope.$watch('service.selectedKey', function () {
