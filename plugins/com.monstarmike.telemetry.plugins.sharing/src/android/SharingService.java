@@ -1,91 +1,108 @@
 package com.monstarmike.telemetry.plugins.sharing;
 
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
  */
 public class SharingService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "com.monstarmike.telemetry.plugins.sharing.action.FOO";
-    private static final String ACTION_BAZ = "com.monstarmike.telemetry.plugins.sharing.action.BAZ";
-
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "com.monstarmike.telemetry.plugins.sharing.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "com.monstarmike.telemetry.plugins.sharing.extra.PARAM2";
+    private static final String TAG = "SharingService";
 
     /**
-     * Starts this service to perform action Foo with the given parameters. If
+     * Starts this service to perform action PrepareShareImage. If
      * the service is already performing a task this action will be queued.
      *
      * @see IntentService
      */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
+    public static void startActionPrepareShareImage(Context context) {
         Intent intent = new Intent(context, SharingService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
-
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, SharingService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.setAction(Constants.SharingService.PrepareShareImage.ACTION);
         context.startService(intent);
     }
 
     public SharingService() {
-        super("SharingService");
+        super(TAG);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d(TAG, "Handling intent in SharingService.");
+
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_FOO.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionFoo(param1, param2);
-            } else if (ACTION_BAZ.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionBaz(param1, param2);
+            Log.d(TAG, "SharingService handling action: " + action);
+            if (Constants.SharingService.PrepareShareImage.ACTION.equals(action)) {
+                handleActionPrepareShareImage();
+            } else {
+                Log.w(TAG, "There is no handler for the intent's action!");
             }
         }
     }
 
     /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
+     * Handle action PrepareShareImage in the provided background thread.
      */
-    private void handleActionFoo(String param1, String param2) {
-        // TODO: Handle action Foo
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void handleActionPrepareShareImage() {
+        String dataUrl = ServiceDataTransfer.getInstance().get_dataUrl();
+
+        byte[] data = this.parseImageBytes(dataUrl);
+
+        if (data != null) {
+            this.handleShare(data);
+
+            Log.d(TAG, "The data url for the image has been saved to a temporary file. Broadcasting...");
+            Intent localIntent = new Intent(Constants.BroadcastActions.PREPARE_SHARE_IMAGE_BROADCAST_ACTION);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+        } else {
+            Log.w(TAG, "Image bytes were not able to be parsed.");
+        }
     }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionBaz(String param1, String param2) {
-        // TODO: Handle action Baz
-        throw new UnsupportedOperationException("Not yet implemented");
+    private byte[] parseImageBytes(String dataUrl) {
+        String encodingPrefix = "base64,";
+
+        int contentStartIndex = dataUrl.indexOf(encodingPrefix) + encodingPrefix.length();
+
+        byte[] data = Base64.decode(dataUrl.substring(contentStartIndex), Base64.DEFAULT);
+
+        return data;
+    }
+
+    private void handleShare(byte data[]) {
+        Bitmap icon = BitmapFactory.decodeByteArray(data, 0, data.length);
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/png");
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+
+        String filepath = Constants.get_temporaryFilename();
+
+        File f = new File(filepath);
+
+        try {
+            f.createNewFile();
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+        } catch (IOException e) {
+            Log.e(TAG, "Exception while creating temporary image file.", e);
+        }
     }
 }
