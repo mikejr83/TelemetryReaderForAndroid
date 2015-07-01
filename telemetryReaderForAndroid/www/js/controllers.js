@@ -1,6 +1,6 @@
 angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndroid.services'])
-  .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', '$window', '$log', 'dataService',
-                          function ($scope, $ionicModal, $timeout, $window, $log, dataService) {
+  .controller('AppCtrl', ['$scope', '$ionicModal', '$ionicLoading', '$timeout', '$window', '$log', 'dataService',
+                          function ($scope, $ionicModal, $ionicLoading, $timeout, $window, $log, dataService) {
       /**
        * A scope level reference to the data service
        */
@@ -16,6 +16,8 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
        * @param {Object} selectedFlight Fully populated flight JSON object.
        */
       var selectedFlightSuccessHandler = function (selectedFlight) {
+		  $ionicLoading.hide();
+		  
           if (selectedFlight) $log.debug('A flight object was handed back by the promise.');
           $scope.selectedFlight = selectedFlight;
         },
@@ -24,6 +26,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
          * @param {Object} error Exception from the promise being rejected.
          */
         selectedFlightErrorHandler = function (error) {
+		  $ionicLoading.hide();
           $log.error('Error during the selected flight handler.', error);
         };
 
@@ -32,7 +35,9 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
        */
       $scope.doGetDataFile = function () {
         $log.debug('Going to get a data file!');
-
+		
+		$ionicLoading.show();
+        
         $scope.service.loadData(true).then(function (data) {
           // ignoring data since we loaded data and set it to the current. data === $scope.service.file
           if ($scope.service.file.flights && $scope.service.file.flights.length > 0) {
@@ -224,39 +229,18 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
 
       $scope.shareChart = function () {
         var filename = 'telemetry_' + $scope.service.selectedKey + '_'
-            $scope.service.selectedFlight.name.replace(' ', '').replace('.', '') + '.png';
-
-        /*$('#myChart canvas')[0].toBlob(function (blob) {
-          $log.debug('Canvas has been exported to a blob.');
-          var reader = new window.FileReader();
-          reader.onloadend = function () {
-			if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && 
-				window.com.monstarmike.telemetry.plugins.sharing && window.com.monstarmike.telemetry.plugins.sharing.share) {
-				$log.debug('Exporting the image data to the social sharing plugin.');
-				var successCallback = function () {
-						$log.debug('success!');
-					},
-					errorCallback = function (error) {
-						$log.error('There was an error during the attempt to share via the sharing plugin!', error);
-					};
-				window.com.monstarmike.telemetry.plugins.sharing.share(reader.result, successCallback, errorCallback);
-			  } else {
-				$log.debug('Saving the file with browser functionality.');
-				saveAs(blob, filename);
-			  }  
-		  };
-          reader.readAsDataURL(blob);
-        });*/
-        
+            $scope.service.selectedFlight.name.replace(' ', '').replace('.', '') + '.png';        
+        $ionicLoading.show();
         
         if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && 
 			window.com.monstarmike.telemetry.plugins.sharing && window.com.monstarmike.telemetry.plugins.sharing.share) {
 			$log.debug('Exporting the image data to the social sharing plugin.');
 			var dataUrl = $('#myChart canvas')[0].toDataURL('image/png');
 			var successCallback = function () {
-					$log.debug('success!');
+					$ionicLoading.hide();
 				},
 				errorCallback = function (error) {
+					$ionicLoading.hide();
 					$log.error('There was an error during the attempt to share via the sharing plugin!', error);
 				};
 			window.com.monstarmike.telemetry.plugins.sharing.share(dataUrl, successCallback, errorCallback);
