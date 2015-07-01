@@ -97,6 +97,12 @@ public class SharingService extends IntentService {
 
         File f = new File(filepath);
 
+        File parentDir = new File(f.getParent());
+
+        if(parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+
         try {
             f.createNewFile();
             FileOutputStream fo = new FileOutputStream(f);
