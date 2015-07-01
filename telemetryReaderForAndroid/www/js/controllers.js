@@ -1,56 +1,87 @@
 angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndroid.services'])
+  .controller('AppCtrl', ['$scope', '$ionicModal', '$timeout', '$window', '$log', 'dataService',
+                          function ($scope, $ionicModal, $timeout, $window, $log, dataService) {
+      /**
+       * A scope level reference to the data service
+       */
+      $scope.service = dataService;
+      /**
+       * A scope level reference to the selected flight.
+       */
+      $scope.selectedFlight = dataService.selectedFlight;
 
-  .controller('AppCtrl', ['$scope', '$ionicModal', '$ionicLoading', '$timeout', '$window', '$state', 'dataService',
-                          function ($scope, $ionicModal, $ionicLoading, $timeout, $window, $state, dataService) {
+      /**
+       * Success handler for setting the selected flight in the service. Called when the
+       * flight is successfully fully populated with JSON telmetry data.
+       * @param {Object} selectedFlight Fully populated flight JSON object.
+       */
+      var selectedFlightSuccessHandler = function (selectedFlight) {
+          if (selectedFlight) $log.debug('A flight object was handed back by the promise.');
+          $scope.selectedFlight = selectedFlight;
+        },
+        /**
+         * Error handler for setting the selected flight. Called when the promise is rejected.
+         * @param {Object} error Exception from the promise being rejected.
+         */
+        selectedFlightErrorHandler = function (error) {
+          $log.error('Error during the selected flight handler.', error);
+        };
+
+      /**
+       * Used by the view to handle the user interaction for loading a new data file.
+       */
       $scope.doGetDataFile = function () {
-        $ionicLoading.show();
-        
-        console.log('get data file');
+        $log.debug('Going to get a data file!');
 
-        dataService.loadData(true).then(function (data) {
-          dataService.file = data;
-          if (dataService.file && dataService.file.flights && dataService.file.flights.length > 0) {
-            dataService.setSelectedFlight(dataService.file.flights[0]).then(function () {
-              console.log('here');
-              window.location = "#/app/fileInfo";
-            });
+        $scope.service.loadData(true).then(function (data) {
+          // ignoring data since we loaded data and set it to the current. data === $scope.service.file
+          if ($scope.service.file.flights && $scope.service.file.flights.length > 0) {
+            $scope.service.setSelectedFlight($scope.service.file.flights[0])
+              .then(selectedFlightSuccessHandler, selectedFlightErrorHandler);
           } else {
-            dataService.selectedFlight = null;
-            window.location = "#/app/fileInfo";
+            $scope.service.setSelectedFlight(null)
+              .then(selectedFlightSuccessHandler, selectedFlightErrorHandler);
           }
         });
       };
 
+      /**
+       * Used by the view to handle the user's selection of a type of telemetry values to view.
+       * @param {String} key   The key value in the flight's view model data hash for the telemetry data
+       * @param {String} title The title to display for the page.
+       */
       $scope.setTelemetryType = function (key, title) {
-        dataService.selectedKey = key;
-        dataService.selectedTitle = title;
+        $scope.service.selectedKey = key;
+        $scope.service.selectedTitle = title;
         $window.title = title;
       }
 }])
-  .controller('TelemetryViewerController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService',
-                                     function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
+  .controller('TelemetryViewerController', ['$scope', '$window', '$log', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService',
+                                     function ($scope, $window, $log, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
       $scope.chart = null;
       $scope.chartData = null;
       $scope.service = dataService;
       $scope.chartDataOptions = null;
 
+      /**
+       * This handler is for the ionic's view enter event. The handler checks for the selected flight. If
+       * no flight is loaded the user is prompted to load a flight otherwise the view is updated through
+       * the selectedFlightChanged scope method.
+       */
       $scope.$on('$ionicView.enter', function () {
         if (!$scope.service.selectedKey)
           $scope.service.selectedKey = 'current';
 
-        if (!$scope.service.flights) {
+        if (!$scope.service.file) {
           $ionicLoading.show();
           dataService.getCurrentData().then(function (file) {
             if (file && file.flights && file.flights.length > 0) {
-              $scope.service.setSelectedFlight(file.flights[0]).then(function() {
+              $scope.service.setSelectedFlight(file.flights[0]).then(function () {
                 $scope.selectedFlightChanged();
               });
             } else {
               $ionicLoading.hide();
             }
-          }, function (error) {
-            $ionicLoading.hide();
-            window.location = '#/app/welcome';
           });
         } else {
           $scope.chart = null;
@@ -100,22 +131,32 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         }
       }
 
+      /**
+       * Handles the selected flight being changed. This scope level method is invokded from the view
+       * whenever the dropdown changes. If no flight was loaded when initially loading the page this
+       * function will be called after a data file is loaded and the first flight in the file is set
+       * to the selected flight.
+       */
       $scope.selectedFlightChanged = function () {
         $ionicLoading.show();
 
         if (!$scope.service.selectedFlight) {
-          console.warn('no selected flight');
+          $log.warn('Cannot handle the selected flight changing when there is no selected flight!');
           $ionicLoading.hide();
           return;
         }
 
-        console.log('selectedKey', $scope.service.selectedKey);
+        // using the selectedKey from the service (set in the app controller) get the chart data options for the flight.
+        $log.debug('The selected view key (selectedKey):', $scope.service.selectedKey);
         $scope.chartDataOptions = $scope.service.selectedFlight.flightData[$scope.service.selectedKey];
-        console.log('chartOptions', $scope.chartDataOptions);
+        $log.debug('The chart\'s data options for the selected key.', $scope.chartDataOptions);
+
         if (!$scope.chartDataOptions) {
+          $log.error('This is embarassing! The selected key doesn\'t have any chart data options defined. Without the chartDataOptions processing cannot continue.');
           return;
         }
 
+        // clone the basic chart options - TODO: explain why I do this!
         var canvasJSChartOptions = _.cloneDeep($scope.chartDataOptions.basic);
 
         if ($scope.chartDataOptions.chartSeriesTypes.length < 3) {
@@ -130,34 +171,45 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
           doSetupChart(canvasJSChartOptions, chartSeriesTypes);
         }
 
-        console.log("CanvasJSChartOptions - ready to go!", canvasJSChartOptions);
+        $log.debug("Finished creating the complete CanvasJS chart data structure (canvasJSChartOptions):", canvasJSChartOptions);
 
         $scope.chart = null;
+
         try {
           $scope.chart = new CanvasJS.Chart("myChart", canvasJSChartOptions);
           $scope.chart.render();
         } catch (e) {
-          console.log("Error when trying to render the chart!", e);
+          $log.error("Error when trying to render the chart!", e);
         }
 
+        // the processing is complete for when a selected flight is changed. Hide the loading/busy indicator.
         $ionicLoading.hide();
       };
 
-      $scope.selectChanged = function (flight) {
+      /**
+       * Handler for the view's select input. Looks to see if the newly selected flight is cached,
+       * previously fully filled out JSON, or if it is just a stub placeholder.
+       * @param {Object} selectedFlight The selected flight. Will be the same object as $scope.service.selectedFlight.
+       */
+      $scope.selectChanged = function (selectedFlight) {
         $ionicLoading.show();
 
-        if ($scope.service.selectedFlight['_cached'] === undefined
-        || !$scope.service.selectedFlight['_cached']) {
+        if ($scope.service.selectedFlight['_cached'] === undefined || !$scope.service.selectedFlight['_cached']) {
           window.setTimeout(function () {
-            $scope.service.setSelectedFlight($scope.service.selectedFlight).then(function(decodedFlight) {
+            $scope.service.setSelectedFlight($scope.service.selectedFlight).then(function (decodedFlight) {
               $scope.selectedFlightChanged();
-             });
+            });
           }, 100);
         } else {
           $scope.selectedFlightChanged();
         }
       };
 
+      /**
+       * Click handler for the series checkboxes. These checkboxes are only shown when there are 3 or more
+       * data series which have different scales for the Y axis.
+       * @param {Object} series The chart series
+       */
       $scope.seriesClicked = function (series) {
 
         var selected = _.where($scope.chartDataOptions.chartSeriesTypes, {
@@ -170,14 +222,77 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
         $scope.selectedFlightChanged();
       }
 
+      $scope.shareChart = function () {
+        var filename = 'telemetry_' + $scope.service.selectedKey + '_'
+            $scope.service.selectedFlight.name.replace(' ', '').replace('.', '') + '.png';
+
+        /*$('#myChart canvas')[0].toBlob(function (blob) {
+          $log.debug('Canvas has been exported to a blob.');
+          var reader = new window.FileReader();
+          reader.onloadend = function () {
+			if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && 
+				window.com.monstarmike.telemetry.plugins.sharing && window.com.monstarmike.telemetry.plugins.sharing.share) {
+				$log.debug('Exporting the image data to the social sharing plugin.');
+				var successCallback = function () {
+						$log.debug('success!');
+					},
+					errorCallback = function (error) {
+						$log.error('There was an error during the attempt to share via the sharing plugin!', error);
+					};
+				window.com.monstarmike.telemetry.plugins.sharing.share(reader.result, successCallback, errorCallback);
+			  } else {
+				$log.debug('Saving the file with browser functionality.');
+				saveAs(blob, filename);
+			  }  
+		  };
+          reader.readAsDataURL(blob);
+        });*/
+        
+        
+        if (window.com && window.com.monstarmike && window.com.monstarmike.telemetry && window.com.monstarmike.telemetry.plugins && 
+			window.com.monstarmike.telemetry.plugins.sharing && window.com.monstarmike.telemetry.plugins.sharing.share) {
+			$log.debug('Exporting the image data to the social sharing plugin.');
+			var dataUrl = $('#myChart canvas')[0].toDataURL('image/png');
+			var successCallback = function () {
+					$log.debug('success!');
+				},
+				errorCallback = function (error) {
+					$log.error('There was an error during the attempt to share via the sharing plugin!', error);
+				};
+			window.com.monstarmike.telemetry.plugins.sharing.share(dataUrl, successCallback, errorCallback);
+		  } else {
+			  ('#myChart canvas')[0].toBlob(function (blob) {
+				  $log.debug('Canvas has been exported to a blob.');
+				  $log.debug('Saving the file with browser functionality.');
+				  saveAs(blob, filename);
+			  });
+		  }
+      };
+
       $scope.$watch('service.selectedKey', function () {
         $scope.selectedFlightChanged();
       });
+
+
 }])
-  .controller('FileInfoController', ['$scope', '$ionicLoading', 'dataService', function($scope, $ionicLoading, dataService) {
-    $scope.service = dataService;
-    
-    $scope.$on('$ionicView.enter', function () {
-      $ionicLoading.hide();
-    });
+  .controller('FileInfoController', ['$scope', '$window', '$ionicLoading', '$ionicScrollDelegate', 'filterFilter', 'dataService',
+                                     function ($scope, $window, $ionicLoading, $ionicScrollDelegate, filterFilter, dataService) {
+
+      $scope.service = dataService;
+
+      $scope.$on('$ionicView.enter', function () {
+        if (!$scope.service.file) {
+          $ionicLoading.show();
+          dataService.getCurrentData().then(function (file) {
+            if (file && file.flights && file.flights.length > 0) {
+              $scope.service.setSelectedFlight(file.flights[0]).then(function () {
+                $ionicLoading.hide();
+              });
+            } else {
+              $ionicLoading.hide();
+            }
+          });
+        }
+      });
+
 }]);

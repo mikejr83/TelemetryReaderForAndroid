@@ -20,16 +20,24 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
   });
 })
 
-.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+.config(['$stateProvider', '$urlRouterProvider', '$logProvider', function ($stateProvider, $urlRouterProvider, $logProvider) {
   $stateProvider
-
     .state('app', {
-    url: "/app",
-    abstract: true,
-    templateUrl: "templates/menu.html",
-    controller: 'AppCtrl'
-  })
-  .state('app.telemetry', {
+      url: "/app",
+      abstract: true,
+      templateUrl: "templates/menu.html",
+      controller: 'AppCtrl'
+    })
+    .state('app.fileinfo', {
+      url: "/fileinfo",
+      views: {
+        'menuContent': {
+          templateUrl: "templates/fileInfo.html",
+          controller: 'FileInfoController'
+        }
+      }
+    })
+    .state('app.telemetry', {
       url: "/telemetry",
       views: {
         'menuContent': {
@@ -57,4 +65,6 @@ angular.module('telemetryReaderForAndroid', ['ionic', 'telemetryReaderForAndroid
     });
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/welcome');
+
+  $logProvider.debugEnabled(!ionic.Platform.isWebView());
 }]);

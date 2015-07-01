@@ -1,5 +1,6 @@
-package com.monstarmike.telemetry.plugins;
+package com.monstarmike.telemetry.plugins.tlmDecoder;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +52,7 @@ public class TLMDecoder extends CordovaPlugin {
         if (action.equalsIgnoreCase("openFile")) {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
-            super.cordova.startActivityForResult(this, intent, 9988);
+            super.cordova.startActivityForResult(this, intent, Constants.PluginIntentActions.GET_FILE);
         } else if (action.equalsIgnoreCase("readFlight")) {
             String fileUriStr = args.getString(0);
             JSONObject flightJO = args.getJSONObject(1);
@@ -91,16 +92,16 @@ public class TLMDecoder extends CordovaPlugin {
             Log.w(TAG, "When in onActivityResult the intent was null.");
             this.callbackContext.error(-1);
         }
-        else if (requestCode == 9988) {
-            String intentData = intent.getDataString();
-            Log.d(TAG, "Intent Data String: " + intentData);
-            if (intentData != null && !intentData.equalsIgnoreCase("")) {
-                Uri fileUri = Uri.parse(intentData);
-                Log.d(TAG, "File URI: " + fileUri.toString());
+        else if (requestCode == Constants.PluginIntentActions.GET_FILE
+                && resultCode == Activity.RESULT_OK) {
+            Uri intentData = intent.getData();
+            Log.d(TAG, "Intent Data: " + intentData.toString());
+            if (intentData != null) {
+                Log.d(TAG, "File URI: " + intentData.toString());
                 Intent exportServiceIntent = new Intent(this.cordova.getActivity(), ExportService.class);
-                exportServiceIntent.setData(fileUri);
+                exportServiceIntent.setData(intentData);
 
-                ServiceDataTransfer.getInstance().set_fileUri(fileUri);
+                ServiceDataTransfer.getInstance().set_fileUri(intentData);
                 ServiceDataTransfer.getInstance().set_callbackContext(callbackContext);
 
                 exportServiceIntent.setAction(Constants.ExportServiceActions.READ_FILE);
@@ -109,6 +110,10 @@ public class TLMDecoder extends CordovaPlugin {
             } else {
                 this.callbackContext.error(-1);
             }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            this.callbackContext.error(Activity.RESULT_CANCELED);
+        } else {
+            this.callbackContext.error(-1);
         }
 
         super.onActivityResult(requestCode, resultCode, intent);

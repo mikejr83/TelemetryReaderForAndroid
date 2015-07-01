@@ -1,4 +1,4 @@
-package com.monstarmike.telemetry.plugins;
+package com.monstarmike.telemetry.plugins.tlmDecoder;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -116,7 +116,7 @@ public class ExportService extends IntentService {
 
         reader.Read(bytes);
 
-        Exporter exporter = new Exporter(uri, reader);
+        Exporter exporter = new Exporter(uri, reader, this.getApplicationContext());
         return exporter.exportFlightData(flightJO);
     }
 
@@ -132,7 +132,7 @@ public class ExportService extends IntentService {
 
         Log.d(TAG, "The reader has read all the bytes. Going to export.");
 
-        Exporter exporter = new Exporter(uri, reader);
+        Exporter exporter = new Exporter(uri, reader, this.getApplicationContext());
 
         JSONObject file = exporter.exportFlights();
 

@@ -17,23 +17,26 @@
       <h1 class="title">Menu</h1>
     </ion-header-bar>
     <ion-content>
-      <ion-list>
-        <ion-item menu-close ng-click="doGetDataFile()">
+      <ion-list >
+        <ion-item ng-click="doGetDataFile()">
           Load Data File
         </ion-item>
-        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('altitude', 'Altitude')">
+        <ion-item ng-show="service.selectedFlight" menu-close href="#/app/fileinfo">
+          File Info
+        </ion-item>
+        <ion-item ng-show="service.selectedFlight" menu-close href="#/app/telemetry" ng-click="setTelemetryType('altitude', 'Altitude')">
           Altitude
         </ion-item>
-        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('current', 'Current')">
+        <ion-item ng-show="service.selectedFlight" menu-close href="#/app/telemetry" ng-click="setTelemetryType('current', 'Current')">
           Current
         </ion-item>
-        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('powerbox', 'PowerBox')">
+        <ion-item ng-show="service.selectedFlight" menu-close href="#/app/telemetry" ng-click="setTelemetryType('powerbox', 'PowerBox')">
           PowerBox
         </ion-item>
-        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('rx', 'RX')">
+        <ion-item ng-show="service.selectedFlight" menu-close href="#/app/telemetry" ng-click="setTelemetryType('rx', 'RX')">
           RX
         </ion-item>
-        <ion-item menu-close href="#/app/telemetry" ng-click="setTelemetryType('standard', 'Standard')">
+        <ion-item ng-show="service.selectedFlight" menu-close href="#/app/telemetry" ng-click="setTelemetryType('standard', 'Standard')">
           Standard
         </ion-item>
       </ion-list>
