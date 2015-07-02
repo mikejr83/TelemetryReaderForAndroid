@@ -245,10 +245,11 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
 				};
 			window.com.monstarmike.telemetry.plugins.sharing.share(dataUrl, successCallback, errorCallback);
 		  } else {
-			  ('#myChart canvas')[0].toBlob(function (blob) {
+			  $('#myChart canvas')[0].toBlob(function (blob) {
 				  $log.debug('Canvas has been exported to a blob.');
 				  $log.debug('Saving the file with browser functionality.');
 				  saveAs(blob, filename);
+				  $ionicLoading.hide();
 			  });
 		  }
       };
