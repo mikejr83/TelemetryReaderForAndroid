@@ -18,10 +18,10 @@
     "org.apache.cordova.console",
     "com.ionic.keyboard",
     "org.apache.cordova.device",
-    "..\\plugins\\com.monstarmike.telemetry.plugins",
+    "../plugins/com.monstarmike.telemetry.plugins.sharing",
     "org.apache.cordova.inappbrowser",
     "cordova-plugin-android-support-v4",
-    "..\\plugins\\com.monstarmike.telemetry.plugins.tlmDecoder",
+    "../plugins/com.monstarmike.telemetry.plugins.tlmDecoder",
     "nl.x-services.plugins.socialsharing"
   ],
   "cordovaPlatforms": [
