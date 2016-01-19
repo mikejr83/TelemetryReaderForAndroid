@@ -10,6 +10,7 @@
 
   <!-- android -->
   <platform name="android">
+    <source-file src="src/android/ServiceDataTransfer.java" target-dir="src/com/monstarmike/telemetry/plugins/sharing" />
     <source-file src="src/android/Sharing.java" target-dir="src/com/monstarmike/telemetry/plugins/sharing" />
     <source-file src="src/android/Constants.java" target-dir="src/com/monstarmike/telemetry/plugins/sharing" />
     <source-file src="src/android/SharingService.java" target-dir="src/com/monstarmike/telemetry/plugins/sharing" />
