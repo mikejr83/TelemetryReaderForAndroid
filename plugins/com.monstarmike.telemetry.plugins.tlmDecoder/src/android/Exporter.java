@@ -189,7 +189,7 @@ public class Exporter {
                 stringBuilder.append(line);
                 line = reader.readLine();
             }
-            jsonTemplate = reader.readLine();
+            jsonTemplate = stringBuilder.toString();
         } catch (IOException e) {
             Log.e(TAG, "Error while reading JSON template.", e);
         } finally {
