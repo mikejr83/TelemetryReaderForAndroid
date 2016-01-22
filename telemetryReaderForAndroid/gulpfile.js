@@ -33,7 +33,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('telemetryplugin', function () {
-  child_process.execSync('ionic plugin rm com.monstarmike.telemetry.plugins');
+  child_process.execSync('ionic plugin rm com.monstarmike.telemetry.plugins.tlmDecoder');
   child_process.execSync('ionic plugin add ../plugins/com.monstarmike.telemetry.plugins.tlmDecoder');
 });
 
