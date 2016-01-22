@@ -326,7 +326,7 @@ angular.module('telemetryReaderForAndroid.services')
                      "animationEnabled": true,
                      "zoomEnabled": true,
                      "title": {
-                       "text": "RX"
+                       "text": "Standard"
                      },
                      "legend": {
                        "horizontalAlign": "center", // "center" , "right"
