@@ -122,9 +122,7 @@ public class Exporter {
 
             flightJO.put("duration", hms.print(period));
 
-            Iterator<HeaderBlock> iterator = flight.get_headerBlocks();
-            while (iterator.hasNext()) {
-                HeaderBlock headerBlock = iterator.next();
+            for (HeaderBlock headerBlock : flight.get_headerBlocks()) {
                 if (headerBlock instanceof HeaderNameBlock) {
                     HeaderNameBlock nameBlock = (HeaderNameBlock) headerBlock;
                     flightJO.put("name", nameBlock.get_modelName());
