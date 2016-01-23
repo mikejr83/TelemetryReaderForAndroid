@@ -150,13 +150,6 @@ public class Exporter {
             }
 
             for (Block b : flight) {
-                JSONObject blockJSON = new JSONObject();
-                try {
-                    blockJSON.put("blockType", b.getClass().getSimpleName());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
                 if (b instanceof HeaderBlock) {
                     try {
                         handleHeaderBlock(flightJO, (HeaderBlock) b);
