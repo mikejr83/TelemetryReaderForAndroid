@@ -151,19 +151,22 @@ public class Exporter {
                 e.printStackTrace();
             }
 
-            for (Block b : flight) {
-                if (b instanceof HeaderBlock) {
-                    try {
-                        handleHeaderBlock(flightJO, (HeaderBlock) b);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else if (b instanceof DataBlock) {
-                    try {
-                        handleDataBlock(flightData, (DataBlock) b);
-                    } catch (JSONException e) {
-                        Log.w(TAG, "JSON error when working with data block", e);
-                    }
+            Iterator<HeaderBlock> headerBlockIterator = flight.get_headerBlocks();
+            while (headerBlockIterator.hasNext()) {
+                HeaderBlock headerBlock = headerBlockIterator.next();
+                try {
+                    handleHeaderBlock(flightJO, headerBlock);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            Iterator<DataBlock> dataBlockIterator = flight.get_dataBlocks();
+            while (dataBlockIterator.hasNext()) {
+                DataBlock dataBlock = dataBlockIterator.next();
+                try {
+                    handleDataBlock(flightData, dataBlock);
+                } catch (JSONException e) {
+                    Log.w(TAG, "JSON error when working with data block", e);
                 }
             }
         }
