@@ -2,6 +2,16 @@
   "name": "telemetryreaderforandroid",
   "version": "1.0.0",
   "description": "telemetryReaderForAndroid: An Ionic project",
+  "license": "GPL-2.0",
+  "author": "Michael Gardner <mikejr83@gmail.com> (http://blog.itsnotfound.com/)",
+  "contributors": [
+    "Michael Gardner <mikejr83@gmail.com> (http://blog.itsnotfound.com/)",
+    "David Leuenberger"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikejr83/TelemetryReaderForAndroid.git"
+  },
   "dependencies": {
     "gulp": "^3.5.6",
     "gulp-sass": "^1.3.3",
