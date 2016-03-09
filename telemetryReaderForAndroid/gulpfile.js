@@ -7,10 +7,44 @@ var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
+var q = require('q');
 
 var paths = {
   sass: ['./scss/**/*.scss']
 };
+
+function resetPlugins() {
+  return q.Promise(function(resolve, reject) {
+	  child_process.exec('ionic plugin rm com.monstarmike.telemetry.plugins.tlmDecoder', function(error, stdout, stderr) {
+		  gutil.log(stdout);
+	  }).on('exit', function() {
+		child_process.exec('ionic plugin add ../plugins/com.monstarmike.telemetry.plugins.tlmDecoder', function (error, stdout, stderr) {
+			gutil.log(stdout);
+		}).on('exit', function () {
+			child_process.exec('ionic plugin rm com.monstarmike.telemetry.plugins.sharing', function (error, stdout, stderr) {
+				gutil.log(stdout);
+			}).on('exit', function () {
+				child_process.exec('ionic plugin add ../plugins/com.monstarmike.telemetry.plugins.sharing', function (error, stdout, stderr) {
+					gutil.log(stdout);
+				}).on('exit', function () {
+					resolve();
+				});
+			});
+		});  
+	  });
+  
+  });
+}
+
+function updateAndroidPlatform() {
+	return q.Promise(function(resolve, reject) {
+		child_process.exec('ionic platform update android', function (error, stdout, stderr) {
+			gutil.log(stdout);
+		}).on('exit', function () {
+			resolve();
+		});
+	});
+}
 
 gulp.task('default', ['sass']);
 
@@ -32,9 +66,18 @@ gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
 });
 
-gulp.task('telemetryplugin', function () {
-  child_process.execSync('ionic plugin rm com.monstarmike.telemetry.plugins');
-  child_process.execSync('ionic plugin add ../plugins/com.monstarmike.telemetry.plugins.tlmDecoder');
+gulp.task('update', function(callback) {
+	resetPlugins().then(function() {
+		updateAndroidPlatform().then(function () {
+			callback();
+		});	
+	});
+});
+
+gulp.task('telemetryplugin', function (callback) {
+	resetPlugins();
+  
+  callback();
 });
 
 gulp.task('install', ['git-check'], function() {
