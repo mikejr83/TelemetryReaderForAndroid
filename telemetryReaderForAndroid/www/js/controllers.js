@@ -47,7 +47,7 @@ angular.module('telemetryReaderForAndroid.controllers', ['telemetryReaderForAndr
             $scope.service.setSelectedFlight(null)
               .then(selectedFlightSuccessHandler, selectedFlightErrorHandler);
           }
-        });
+        }, selectedFlightErrorHandler);
       };
 
       /**
