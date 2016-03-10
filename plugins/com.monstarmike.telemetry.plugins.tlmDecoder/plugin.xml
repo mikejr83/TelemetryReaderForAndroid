@@ -5,11 +5,13 @@
   <license>GPL v2</license>
 
   <js-module src="www/decoder.js" name="tlmDecoder">
-    <clobbers target="com.monstarmike.telemetry.plugins.tlmDecoder" />
+    <merges target="com.monstarmike.telemetry.plugins.tlmDecoder" />
   </js-module>
 
   <!-- android -->
   <platform name="android">
+	<framework src="com.android.support:support-v4:23+" />
+  
     <source-file src="src/android/TLMDecoder.java" target-dir="src/com/monstarmike/telemetry/plugins/tlmDecoder" />
     <source-file src="src/android/Exporter.java" target-dir="src/com/monstarmike/telemetry/plugins/tlmDecoder" />
     <source-file src="src/android/ExportService.java" target-dir="src/com/monstarmike/telemetry/plugins/tlmDecoder" />

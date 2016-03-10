@@ -151,26 +151,22 @@ public class Exporter {
                 e.printStackTrace();
             }
 
-            for (Block b : flight) {
-                JSONObject blockJSON = new JSONObject();
+            Iterator<HeaderBlock> headerBlockIterator = flight.get_headerBlocks();
+            while (headerBlockIterator.hasNext()) {
+                HeaderBlock headerBlock = headerBlockIterator.next();
                 try {
-                    blockJSON.put("blockType", b.getClass().getSimpleName());
+                    handleHeaderBlock(flightJO, headerBlock);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                if (b instanceof HeaderBlock) {
-                    try {
-                        handleHeaderBlock(flightJO, (HeaderBlock) b);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else if (b instanceof DataBlock) {
-                    try {
-                        handleDataBlock(flightData, (DataBlock) b);
-                    } catch (JSONException e) {
-                        Log.w(TAG, "JSON error when working with data block", e);
-                    }
+            }
+            Iterator<DataBlock> dataBlockIterator = flight.get_dataBlocks();
+            while (dataBlockIterator.hasNext()) {
+                DataBlock dataBlock = dataBlockIterator.next();
+                try {
+                    handleDataBlock(flightData, dataBlock);
+                } catch (JSONException e) {
+                    Log.w(TAG, "JSON error when working with data block", e);
                 }
             }
         }
@@ -346,6 +342,10 @@ public class Exporter {
             rpmBlock.put("y", standard.get_rpm());
             tempBlock.put("y", standard.get_temperature());
             voltBlock.put("y", standard.get_volt());
+
+            this.findDataPointsArray(flightData, "standard", 0, 0).put(rpmBlock);
+            this.findDataPointsArray(flightData, "standard", 1, 0).put(tempBlock);
+            this.findDataPointsArray(flightData, "standard", 2, 0).put(voltBlock);
 
         } else if (dataBlock instanceof VarioBlock) {
 //            VarioBlock varioBlock = (VarioBlock) dataBlock;
